@@ -1,298 +1,82 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { CheckCircle, RotateCcw, Vote, Calendar, Clock, AlertTriangle, ShieldCheck } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nanded EVM Awareness</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .machine-bg { background: #e2e8f0; border: 4px solid #94a3b8; border-radius: 20px; }
+        .beep-light { width: 20px; height: 20px; border-radius: 50%; background: #4b5563; }
+        .beep-active { background: #ef4444; box-shadow: 0 0 10px #ef4444; }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 flex flex-col items-center">
 
-const App = () => {
-  const [isWard20, setIsWard20] = useState(false);
-  const [votedSeats, setVotedSeats] = useState({ A: null, B: null, C: null, D: null, E: null });
-  const [vvpatSlip, setVvpatSlip] = useState(null);
-  const [isComplete, setIsComplete] = useState(false);
-  const [busyMachine, setBusyMachine] = useState(null);
-  
-  const audioCtx = useRef(null);
-
-  // Seat details matching official NWCMC guidelines
-  const seatsRegular = [
-    { id: 'A', name: 'Seat A (अ)', color: 'bg-white', text: 'text-gray-800', border: 'border-slate-300', machineBg: 'bg-slate-100', accent: 'border-slate-400' },
-    { id: 'B', name: 'Seat B (ब)', color: 'bg-pink-100', text: 'text-pink-900', border: 'border-pink-300', machineBg: 'bg-pink-100/50', accent: 'border-pink-400' },
-    { id: 'C', name: 'Seat C (क)', color: 'bg-yellow-100', text: 'text-yellow-900', border: 'border-yellow-300', machineBg: 'bg-yellow-100/50', accent: 'border-yellow-400' },
-    { id: 'D', name: 'Seat D (ड)', color: 'bg-blue-100', text: 'text-blue-900', border: 'border-blue-300', machineBg: 'bg-blue-100/50', accent: 'border-blue-400' }
-  ];
-
-  const seatE = { id: 'E', name: 'Seat E (इ)', color: 'bg-green-100', text: 'text-green-900', border: 'border-green-300', machineBg: 'bg-green-100/50', accent: 'border-green-400' };
-  const currentSeats = isWard20 ? [...seatsRegular, seatE] : seatsRegular;
-
-  const symbols = ["☕", "🍳", "🛺", "🚲", "📱"];
-
-  // Sound logic for physical button feel
-  const playSound = (type) => {
-    if (!audioCtx.current) {
-      audioCtx.current = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.current.state === 'suspended') audioCtx.current.resume();
-
-    const oscillator = audioCtx.current.createOscillator();
-    const gainNode = audioCtx.current.createGain();
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.current.destination);
-
-    if (type === 'click') {
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(1200, audioCtx.current.currentTime);
-      gainNode.gain.setValueAtTime(0.1, audioCtx.current.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.current.currentTime + 0.1);
-      oscillator.start();
-      oscillator.stop(audioCtx.current.currentTime + 0.1);
-    } else if (type === 'beep') {
-      oscillator.type = 'square';
-      oscillator.frequency.setValueAtTime(800, audioCtx.current.currentTime); 
-      gainNode.gain.setValueAtTime(0.1, audioCtx.current.currentTime);
-      oscillator.start();
-      oscillator.stop(audioCtx.current.currentTime + 1.5);
-    }
-  };
-
-  const handleVote = (seatId, candidateIndex) => {
-    // If slip is scrolling or already voted, ignore
-    if (isComplete || votedSeats[seatId] !== null || busyMachine !== null) return;
-    
-    setBusyMachine(seatId);
-    
-    const newVotes = { ...votedSeats, [seatId]: candidateIndex };
-    setVotedSeats(newVotes);
-    
-    setVvpatSlip({
-      seat: seatId,
-      candidate: candidateIndex === 4 ? 'NOTA' : `Ummidwar ${candidateIndex + 1}`,
-      symbol: candidateIndex === 4 ? '❌' : symbols[candidateIndex]
-    });
-
-    // Slip viewing delay (4 seconds)
-    setTimeout(() => {
-      setVvpatSlip(null);
-      setBusyMachine(null);
-    }, 4000);
-
-    const requiredVotes = isWard20 ? 5 : 4;
-    const currentVotesCount = Object.keys(newVotes).filter(k => (isWard20 || k !== 'E') && newVotes[k] !== null).length;
-    
-    if (currentVotesCount === requiredVotes) {
-      playSound('beep');
-      // Delay modal to show the final slip
-      setTimeout(() => {
-        setIsComplete(true);
-      }, 3500);
-    } else {
-      playSound('click');
-    }
-  };
-
-  const resetVoting = () => {
-    setVotedSeats({ A: null, B: null, C: null, D: null, E: null });
-    setIsComplete(false);
-    setVvpatSlip(null);
-    setBusyMachine(null);
-  };
-
-  return (
-    <div className="min-h-screen bg-slate-200 font-sans text-slate-900 flex flex-col">
-      {/* Header - Will scroll away */}
-      <header className="bg-[#1e3a8a] text-white p-4 shadow-xl border-b-4 border-orange-600 relative z-40">
-        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-4">
-          <div className="text-center lg:text-left">
-            <h1 className="text-lg md:text-2xl font-black uppercase tracking-tighter leading-none mb-1 text-white">Nanded Waghala Municipal Corporation</h1>
-            <p className="text-orange-400 font-bold text-[10px] md:text-xs tracking-[0.2em] uppercase italic">EVM Awareness Simulation २०२५-२६</p>
-          </div>
-          <div className="flex bg-black/20 p-1 rounded-xl backdrop-blur-md border border-white/10 w-full lg:w-auto">
-            <button 
-              onClick={() => { setIsWard20(false); resetVoting(); }}
-              className={`flex-1 lg:flex-none px-4 py-2 rounded-lg text-[10px] md:text-xs font-black transition-all ${!isWard20 ? 'bg-orange-600 text-white shadow-lg' : 'text-slate-300 hover:text-white'}`}
-            >
-              WARD 1-19 (4 VOTES)
-            </button>
-            <button 
-              onClick={() => { setIsWard20(true); resetVoting(); }}
-              className={`flex-1 lg:flex-none px-4 py-2 rounded-lg text-[10px] md:text-xs font-black transition-all ${isWard20 ? 'bg-orange-600 text-white shadow-lg' : 'text-slate-300 hover:text-white'}`}
-            >
-              WARD 20 (5 VOTES)
-            </button>
-          </div>
+    <div class="max-w-md w-full bg-white shadow-2xl rounded-2xl p-6 border-t-8 border-blue-600">
+        <h1 class="text-2xl font-bold text-center text-blue-800">Nanded Waghala Municipal Corporation</h1>
+        <p class="text-sm text-center text-gray-600 mb-4 italic">EVM Awareness Simulation</p>
+        
+        <div class="bg-blue-50 p-3 rounded-lg text-xs mb-6 border border-blue-200">
+            <p>🗓️ 15 Jan 2026 | ⏰ 07:30 AM - 05:30 PM</p>
+            <p class="font-bold text-red-600 mt-1">Zaroori: Har seat ke liye button dabayein!</p>
         </div>
-      </header>
 
-      {/* Schedule Banner - Will scroll away */}
-      <section className="bg-orange-600 text-white py-2 px-4 shadow-md z-30">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-8 text-center">
-           <div className="flex items-center gap-2">
-              <Calendar size={14} className="text-orange-200" />
-              <div className="flex flex-col items-center sm:items-start leading-none">
-                <span className="text-[10px] font-black uppercase tracking-tight">Thursday, 15 Jan 2026</span>
-                <span className="text-[9px] font-bold opacity-80">गुरुवार, १५ जाने २०२६</span>
-              </div>
-           </div>
-           <div className="hidden sm:block w-px h-5 bg-white/20"></div>
-           <div className="flex items-center gap-2">
-              <Clock size={14} className="text-orange-200" />
-              <div className="flex flex-col items-center sm:items-start leading-none">
-                <span className="text-[10px] font-black uppercase tracking-tight">07:30 AM - 05:30 PM</span>
-                <span className="text-[9px] font-bold opacity-80">७:३० AM ते ५:३० PM</span>
-              </div>
-           </div>
-        </div>
-      </section>
-
-      {/* ✨ FIXED SMART VVPAT UNIT - Always stays at top of viewport during scroll */}
-      <div className="sticky top-0 z-[100] w-full flex justify-center py-2 bg-slate-200/95 backdrop-blur-md border-b-2 border-slate-300 shadow-2xl pointer-events-none">
-        <div className="w-full max-w-[280px] md:max-w-sm px-2 pointer-events-auto">
-           <div className="bg-slate-400 p-2 rounded-2xl shadow-xl border-b-4 border-slate-500 relative transform scale-95 transition-all">
-              <div className="bg-[#0a0a0a] h-20 md:h-24 rounded-lg flex items-center justify-center overflow-hidden border-4 border-slate-600 shadow-inner">
-                 {vvpatSlip ? (
-                   <div className="bg-white w-24 md:w-28 h-16 md:h-20 p-1.5 shadow-md flex flex-col items-center justify-center animate-[scrollPaper_4s_linear] border-x border-slate-100 text-center">
-                      <p className="text-[5px] font-bold text-slate-300 mb-0.5 border-b w-full uppercase tracking-widest leading-none pb-0.5">VVPAT SLIP</p>
-                      <span className="text-xl md:text-2xl mb-1">{vvpatSlip.symbol}</span>
-                      <p className="text-[8px] md:text-[9px] font-black text-black leading-none uppercase">{vvpatSlip.candidate}</p>
-                      <p className="text-[6px] md:text-[7px] mt-1 bg-slate-200 px-1.5 font-bold rounded uppercase italic">SEAT {vvpatSlip.seat}</p>
-                   </div>
-                 ) : (
-                   <div className="text-slate-600 font-mono text-[8px] text-center animate-pulse tracking-tighter uppercase font-bold leading-tight">
-                      [ System Ready ]<br/>Watch your slip here
-                   </div>
-                 )}
-              </div>
-              <div className="mt-1 flex justify-between items-center px-1 text-[6px] font-black text-slate-700 tracking-widest">
-                 <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_5px_green]"></div><span>POWER</span></div>
-                 <div className="flex items-center gap-1"><span>BUSY</span><div className={`w-1.5 h-1.5 rounded-full transition-colors ${vvpatSlip ? 'bg-red-500 shadow-[0_0_8px_red]' : 'bg-slate-500'}`}></div></div>
-              </div>
-           </div>
-        </div>
-      </div>
-
-      <main className="max-w-7xl mx-auto px-4 mt-4 flex-grow w-full pb-32">
-        {/* EVM Units Grid */}
-        <div className={`grid grid-cols-1 sm:grid-cols-2 ${isWard20 ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-6`}>
-          {currentSeats.map((seat) => {
-            const isVoted = votedSeats[seat.id] !== null;
-            const machineIsBusy = busyMachine === seat.id;
-            const allDisabled = busyMachine !== null;
-            const isNext = !isVoted && busyMachine === null && currentSeats.findIndex(s => s.id === seat.id) === currentSeats.filter(s => votedSeats[s.id] !== null).length;
-
-            return (
-              <div key={seat.id} className={`relative flex flex-col rounded-3xl p-3 shadow-2xl border-x-4 border-b-8 transition-all duration-300 ${isNext ? 'ring-8 ring-blue-500/20 scale-[1.02]' : ''} ${seat.machineBg} ${seat.accent.replace('border-', 'border-b-')}`}>
-                <div className="flex justify-between items-center px-2 py-1 bg-black/5 rounded-lg mb-3">
-                   <div className="flex items-center gap-1"><div className={`w-2.5 h-2.5 rounded-full ${isVoted ? 'bg-slate-600' : 'bg-green-500 shadow-[0_0_5px_green]'}`} /><span className="text-[8px] font-black text-slate-600 uppercase">Ready</span></div>
-                   <div className="flex items-center gap-1"><span className="text-[8px] font-black text-slate-600 uppercase">Busy</span><div className={`w-2.5 h-2.5 rounded-full ${machineIsBusy ? 'bg-red-600 shadow-[0_0_5px_red]' : 'bg-slate-500'}`} /></div>
+        <div class="machine-bg p-4 space-y-3">
+            <div class="flex justify-end mb-2"><div id="beepLight" class="beep-light"></div></div>
+            
+            <div class="space-y-4">
+                <div class="flex items-center justify-between bg-white p-2 rounded border-l-8 border-gray-400">
+                    <span class="text-sm font-bold">Seat A (Safed)</span>
+                    <button onclick="vote(1, this)" class="w-12 h-8 bg-blue-500 rounded shadow-inner active:bg-blue-800"></button>
                 </div>
-                <div className={`bg-white rounded-xl border-2 ${seat.border} p-1 shadow-inner flex-grow`}>
-                  <div className={`${seat.color} py-1.5 px-2 mb-3 text-center text-xs font-black rounded border-2 ${seat.border} shadow-md uppercase tracking-tight`}>{seat.name}</div>
-                  <div className="space-y-1">
-                    {[0, 1, 2, 3, 4].map((idx) => {
-                      const isSelected = votedSeats[seat.id] === idx;
-                      const isNota = idx === 4;
-                      return (
-                        <div key={idx} className={`flex items-center gap-2 h-12 border-b border-slate-50 last:border-0 px-1 ${isSelected ? 'bg-red-50' : ''}`}>
-                          <div className="flex-1 flex items-center gap-2 overflow-hidden pr-1">
-                            <span className="text-[10px] font-black w-3 text-slate-400">{idx + 1}</span>
-                            <div className="flex flex-col truncate leading-none">
-                               <span className="text-[9px] font-black uppercase text-slate-800">{isNota ? 'NOTA' : `Candidate ${idx + 1}`}</span>
-                               <span className="text-[8px] font-bold text-slate-400 mt-0.5">{isNota ? 'नोटा' : `उमेदवार ${idx + 1}`}</span>
-                            </div>
-                            <span className="text-xl ml-auto">{isNota ? '❌' : symbols[idx]}</span>
-                          </div>
-                          <div className="bg-slate-100 p-1 rounded-lg flex items-center gap-2 border border-slate-200 shadow-sm">
-                             <div className={`w-3.5 h-3.5 rounded-full border-2 border-black/10 transition-colors duration-300 ${isSelected ? 'bg-red-600 shadow-[0_0_8px_red]' : 'bg-slate-300 shadow-inner'}`} />
-                             <button 
-                               onClick={() => handleVote(seat.id, idx)} 
-                               disabled={isComplete || isVoted || allDisabled} 
-                               className={`w-10 h-8 rounded shadow-md active:translate-y-1 transition-all ${isSelected ? 'bg-[#000080]' : 'bg-[#1e40af] hover:bg-blue-700'} disabled:opacity-40 flex items-center justify-center`}
-                             >
-                               <div className="w-4 h-4 rounded-full border border-white/20" />
-                             </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                <div class="flex items-center justify-between bg-white p-2 rounded border-l-8 border-pink-400">
+                    <span class="text-sm font-bold">Seat B (Gulabi)</span>
+                    <button onclick="vote(2, this)" class="w-12 h-8 bg-blue-500 rounded shadow-inner active:bg-blue-800"></button>
                 </div>
-              </div>
-            );
-          })}
+                <div class="flex items-center justify-between bg-white p-2 rounded border-l-8 border-yellow-400">
+                    <span class="text-sm font-bold">Seat C (Peela)</span>
+                    <button onclick="vote(3, this)" class="w-12 h-8 bg-blue-500 rounded shadow-inner active:bg-blue-800"></button>
+                </div>
+                <div class="flex items-center justify-between bg-white p-2 rounded border-l-8 border-blue-400">
+                    <span class="text-sm font-bold">Seat D (Neela)</span>
+                    <button onclick="vote(4, this)" class="w-12 h-8 bg-blue-500 rounded shadow-inner active:bg-blue-800"></button>
+                </div>
+            </div>
         </div>
 
-        {/* Info Notice Box */}
-        <section className="mt-16 bg-white border-2 border-slate-300 rounded-[2rem] p-6 text-slate-800 shadow-xl max-w-4xl mx-auto">
-           <div className="flex items-center gap-3 mb-4 text-orange-600 border-b pb-4">
-              <AlertTriangle size={24} strokeWidth={3} />
-              <h3 className="font-black uppercase text-base tracking-tight leading-none">Important Public Notice / सूचना</h3>
-           </div>
-           <div className="grid md:grid-cols-2 gap-6 text-[11px] md:text-sm font-bold leading-relaxed text-slate-600">
-              <div className="p-5 bg-orange-50/50 rounded-2xl border-2 border-orange-100">
-                Yeh website sirf logo ki jaagrukta (awareness) aur unhe voting process samjhane ke liye ek demo ke taur par banayi gayi hai. Iska maqsad logo ko matdaan mein hone wali mushkilaat se bachana hai. Humara kisi bhi political party ya raajneetik dal se koi lena-dena nahi hai.
-              </div>
-              <div className="p-5 bg-blue-50/50 rounded-2xl border-2 border-blue-100">
-                This website is an independent educational demonstration created solely for public awareness. Its purpose is to help voters understand the multi-vote system to ensure a smooth voting experience. We are not affiliated with any political party or organization.
-              </div>
-           </div>
-        </section>
-
-        {/* Final Completion Modal */}
-        {isComplete && (
-          <div className="fixed inset-0 bg-black/95 backdrop-blur-xl flex items-center justify-center z-[110] p-4 animate-in fade-in duration-300">
-            <div className="bg-white rounded-[2.5rem] p-8 md:p-10 max-w-xs w-full text-center shadow-2xl border-t-8 border-green-500 scale-in-center">
-              <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-                <CheckCircle size={48} />
-              </div>
-              <h2 className="text-4xl font-black italic text-slate-900 mb-2 tracking-tighter uppercase leading-none">BEEEEP...!!!</h2>
-              <p className="text-[10px] font-black text-slate-500 uppercase mb-8 tracking-[0.3em] border-b pb-4 text-center">Voting Successful</p>
-              
-              <div className="mb-10 p-5 bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-100 rounded-3xl">
-                <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-3 border-b border-blue-100 pb-2 text-center">Loktantra Sandesh</p>
-                <p className="text-base font-black text-blue-900 leading-tight italic text-center">
-                  "Aapka vote aapki taqat hai. Loktantra ko mazboot banayein!"
-                </p>
-              </div>
-
-              <button 
-                onClick={resetVoting}
-                className="w-full bg-[#1e3a8a] text-white py-5 rounded-2xl font-black uppercase tracking-[0.2em] hover:bg-blue-900 transition-all flex items-center justify-center gap-3 shadow-2xl active:scale-95 border-b-4 border-blue-950"
-              >
-                <RotateCcw size={22} /> New Simulation
-              </button>
-            </div>
-          </div>
-        )}
-      </main>
-
-      {/* Progress Widget */}
-      <div className="fixed bottom-6 left-0 right-0 px-4 pointer-events-none z-[40]">
-         <div className="max-w-[280px] md:max-w-sm mx-auto bg-slate-900/95 backdrop-blur-xl shadow-[0_25px_60px_rgba(0,0,0,0.5)] border-2 border-slate-700 p-2 md:p-3 rounded-[2rem] flex items-center justify-between pointer-events-auto text-white ring-2 ring-white/5">
-            <div className="flex items-center gap-3">
-               <div className="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
-                  <Vote size={22} />
-               </div>
-               <div>
-                  <p className="text-[8px] text-blue-400 font-black uppercase tracking-[0.2em] mb-0.5 leading-none">Status</p>
-                  <p className="font-black text-[10px] md:text-xs tracking-tight leading-none">{Object.values(votedSeats).filter(v => v !== null).length} / {isWard20 ? '5' : '4'} Rec.</p>
-               </div>
-            </div>
-            <div className="flex gap-1.5 px-2">
-               {currentSeats.map(s => (
-                 <div key={s.id} className={`w-3 h-3 rounded-full transition-all duration-700 shadow-inner ${votedSeats[s.id] !== null ? 'bg-green-500 shadow-[0_0_15px_#22c55e] scale-125' : 'bg-slate-700 border border-slate-600'}`} />
-               ))}
-            </div>
-         </div>
-      </div>
-
-      <footer className="text-center py-20 bg-slate-300 border-t-2 border-slate-400 relative">
-        <p className="text-slate-900 font-black text-4xl italic tracking-tighter mb-1">7ONLY</p>
-        <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.5em] opacity-80">Public Awareness Initiative</p>
-      </footer>
-
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes scrollPaper { 0% { transform: translateY(100%); opacity: 0; } 12% { transform: translateY(0); opacity: 1; } 88% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-100%); opacity: 0; } }
-        .scale-in-center { animation: scale-in-center 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
-        @keyframes scale-in-center { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-      `}} />
+        <div id="status" class="mt-6 text-center font-bold text-lg text-gray-400">
+            Votes: 0 / 4
+        </div>
+        
+        <button onclick="resetEVM()" class="mt-4 text-xs text-blue-600 underline w-full text-center">Reset Machine</button>
     </div>
-  );
-};
 
-export default App;
+    <script>
+        let count = 0;
+        const total = 4;
+        let voted = [false, false, false, false];
+
+        function vote(id, btn) {
+            if(!voted[id-1]) {
+                count++;
+                voted[id-1] = true;
+                btn.style.backgroundColor = "#1e40af";
+                btn.disabled = true;
+                document.getElementById('status').innerText = "Votes: " + count + " / " + total;
+                
+                if(count === total) {
+                    document.getElementById('beepLight').classList.add('beep-active');
+                    document.getElementById('status').innerText = "BEEEEEP! Voting Complete";
+                    document.getElementById('status').classList.remove('text-gray-400');
+                    document.getElementById('status').classList.add('text-green-600');
+                }
+            }
+        }
+
+        function resetEVM() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>
