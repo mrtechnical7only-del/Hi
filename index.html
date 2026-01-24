@@ -3,415 +3,522 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>For My Queen Benazir - Kitten Magic & Music</title>
-    <!-- Romantic Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Great+Vibes&display=swap" rel="stylesheet">
+    <title>BGMI UC Mega Sale - 50% OFF</title>
+    <!-- External Fonts and Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    
     <style>
-        /* --- CSS STYLES --- */
-        body, html {
+        /* CSS Variables for colors */
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --primary-amber: #f59e0b;
+            --accent-red: #ef4444;
+            --text-white: #ffffff;
+            --text-slate: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-white);
+            font-family: 'Rajdhani', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .gaming-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Header Styles */
+        header {
+            padding: 2rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            font-style: italic;
+            letter-spacing: -2px;
+        }
+
+        .logo span {
+            color: var(--primary-amber);
+        }
+
+        .sub-header {
+            color: var(--text-slate);
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-size: 0.8rem;
+        }
+
+        /* Marquee Alert */
+        .alert-banner {
+            background: var(--accent-red);
+            color: white;
+            padding: 0.75rem 0;
+            font-weight: bold;
             overflow: hidden;
-            background: #050005; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Dancing Script', cursive;
-            touch-action: none;
+            white-space: nowrap;
         }
 
-        #bg-gradient {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: url('1000057019.png'); /* Added background image */
-            background-size: cover; /* Ensure the image covers the whole background */
-            background-position: center; /* Center the image */
-            z-index: 0;
+        .marquee {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 20s linear infinite;
+            text-transform: uppercase;
         }
 
-        #mainCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
+        @keyframes marquee {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
         }
 
-        /* Start Screen */
-        #overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); /* Made the overlay more transparent */
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            transition: opacity 1s;
-        }
-
-        .btn {
-            padding: 18px 50px;
-            font-size: 2rem;
-            background: linear-gradient(45deg, #ff0040, #ff5c8a);
-            border: none;
-            border-radius: 50px;
-            color: white;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(255, 0, 64, 0.4);
-            font-family: 'Great Vibes', cursive;
-            margin-top: 20px;
-        }
-
-        /* The Main Heart UI */
-        #heart-ui {
-            position: relative;
-            z-index: 10;
-            cursor: pointer;
-            display: none;
+        /* Hero Section */
+        .hero {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 1rem;
             text-align: center;
         }
 
-        .heart {
-            width: 140px;
-            height: 140px;
-            background-color: #ff0040;
+        .hero h2 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, var(--primary-amber), var(--accent-red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-desc {
+            font-size: 1.25rem;
+            color: var(--text-slate);
+            max-width: 700px;
+            margin: 0 auto 2.5rem auto;
+        }
+
+        /* Countdown Grid */
+        .countdown-container {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .timer-box {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--accent-red);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            min-width: 100px;
+        }
+
+        .timer-box .val {
+            font-size: 2.5rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .timer-box .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--accent-red);
+            font-weight: bold;
+        }
+
+        .sale-date {
+            color: var(--accent-red);
+            font-weight: bold;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        /* Pricing Grid */
+        .pricing-section {
+            max-width: 1100px;
+            margin: 0 auto 5rem auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            border-radius: 1.5rem;
             position: relative;
-            transform: rotate(-45deg);
-            animation: pulse 0.8s infinite alternate cubic-bezier(0.25, 0, 0, 1);
-            box-shadow: 0 0 60px rgba(255, 0, 64, 0.7);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary-amber);
+        }
+
+        .badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--primary-amber);
+            color: black;
+            padding: 0.4rem 1.2rem;
+            font-weight: bold;
+            border-bottom-left-radius: 1rem;
+            font-size: 0.8rem;
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .card-header i {
+            font-size: 2.5rem;
+            color: var(--primary-amber);
+            margin-bottom: 0.5rem;
+        }
+
+        .uc-amount {
+            font-size: 1.75rem;
+            font-weight: bold;
+        }
+
+        .bonus-info {
+            color: var(--primary-amber);
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .price-box {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 1rem;
+            border-radius: 1rem;
+            border: 1px solid #1e293b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .old-price {
+            text-decoration: line-through;
+            color: var(--text-slate);
+            font-size: 1.1rem;
+        }
+
+        .new-price {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .btn-locked {
+            width: 100%;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 1rem;
+            background: #1e293b;
+            color: #475569;
+            border: none;
+            font-weight: bold;
+            cursor: not-allowed;
+            text-transform: uppercase;
+        }
+
+        /* Registration Section */
+        .registration {
+            background: rgba(30, 41, 59, 0.4);
+            padding: 5rem 1rem;
+            text-align: center;
+        }
+
+        .registration-content {
+            max-width: 500px;
             margin: 0 auto;
         }
 
-        .heart::before, .heart::after {
-            content: "";
-            width: 140px;
-            height: 140px;
-            background-color: #ff0040;
-            border-radius: 50%;
-            position: absolute;
+        .registration h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
         }
 
-        .heart::before { top: -70px; left: 0; }
-        .heart::after { top: 0; left: 70px; }
-
-        @keyframes pulse {
-            0% { transform: rotate(-45deg) scale(1); }
-            100% { transform: rotate(-45deg) scale(1.3); }
+        .registration p {
+            color: var(--text-slate);
+            margin-bottom: 2rem;
+            font-style: italic;
         }
 
-        .msg {
-            color: #ffb3c1;
-            margin-top: 120px;
-            font-size: 1.8rem;
-            text-shadow: 0 0 15px rgba(255,179,193,0.6);
+        .form-group {
+            display: flex;
+            gap: 10px;
         }
 
-        /* Hidden YouTube Container */
-        #yt-player {
-            display: none;
+        input[type="email"] {
+            flex: 1;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            color: white;
+            outline: none;
+        }
+
+        input[type="email"]:focus {
+            border-color: var(--primary-amber);
+        }
+
+        .btn-submit {
+            padding: 1rem 2rem;
+            background: var(--primary-amber);
+            color: black;
+            font-weight: bold;
+            border-radius: 0.75rem;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-submit:hover {
+            background: #fbbf24;
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 1rem;
+            text-align: center;
+            color: #475569;
+            border-top: 1px solid #1e293b;
+        }
+
+        @media (max-width: 768px) {
+            .hero h2 { font-size: 2.5rem; }
+            .countdown-container { gap: 0.5rem; }
+            .timer-box { min-width: 70px; padding: 1rem; }
+            .form-group { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
-    <div id="bg-gradient"></div>
+    <header>
+        <div class="logo gaming-font">BGMI <span>UC STORE</span></div>
+        <p class="sub-header">Official Authorized Discount Partner</p>
+    </header>
 
-    <div id="overlay">
-        <h1 style="font-size: 3rem; font-family: 'Great Vibes'; margin-bottom: 10px;">For Benazir Fatima</h1>
-        <p style="font-size: 1.2rem; opacity: 0.7;">Something magical is waiting for you...</p>
-        <button class="btn" onclick="initExperience()">Open Your Gift 🐱❤️</button>
+    <div class="alert-banner">
+        <div class="marquee">
+            ⚡ HURRY UP! LIMITED PERIOD OFFER - 50% DISCOUNT ON ALL PACKS! SALE STARTS FEB 15, 2026! ⚡ SAME DAY DELIVERY GUARANTEED! ⚡
+        </div>
     </div>
 
-    <div id="heart-ui" onclick="explode()">
-        <div class="heart"></div>
-        <p class="msg">Benazir, touch my heart...</p>
-    </div>
+    <section class="hero">
+        <h2 class="gaming-font">MEGA <span class="gradient-text">DISCOUNT SALE</span></h2>
+        <p class="hero-desc">
+            The biggest event in BGMI history is almost here. All UC packs will be available at exactly half price. Be ready!
+        </p>
 
-    <!-- Hidden YouTube Player for Baby Song -->
-    <div id="yt-player"></div>
+        <div class="countdown-container">
+            <div class="timer-box">
+                <span class="val" id="days">00</span>
+                <span class="label">Days</span>
+            </div>
+            <div class="timer-box">
+                <span class="val" id="hours">00</span>
+                <span class="label">Hrs</span>
+            </div>
+            <div class="timer-box">
+                <span class="val" id="minutes">00</span>
+                <span class="label">Min</span>
+            </div>
+            <div class="timer-box">
+                <span class="val" id="seconds">00</span>
+                <span class="label">Sec</span>
+            </div>
+        </div>
 
-    <canvas id="mainCanvas"></canvas>
+        <div class="sale-date">
+            <i class="fas fa-calendar-alt"></i>
+            <span>SALE STARTING ON: 15 FEBRUARY 2026</span>
+        </div>
+    </section>
+
+    <section class="pricing-section">
+        <!-- Pack 1 -->
+        <div class="card">
+            <div class="badge">50% OFF</div>
+            <div class="card-header">
+                <i class="fas fa-coins"></i>
+                <div class="uc-amount">60 UC</div>
+            </div>
+            <div class="price-box">
+                <div class="old-price">₹75</div>
+                <div class="new-price">₹37</div>
+            </div>
+            <button class="btn-locked">Unlocks Feb 15</button>
+        </div>
+
+        <!-- Pack 2 -->
+        <div class="card" style="border-color: rgba(245, 158, 11, 0.4)">
+            <div class="badge" style="background: #ef4444; color: white;">POPULAR</div>
+            <div class="card-header">
+                <i class="fas fa-coins"></i>
+                <div class="uc-amount">325 UC</div>
+                <div class="bonus-info">(300 + 25 Bonus)</div>
+            </div>
+            <div class="price-box">
+                <div class="old-price">₹380</div>
+                <div class="new-price">₹190</div>
+            </div>
+            <button class="btn-locked">Unlocks Feb 15</button>
+        </div>
+
+        <!-- Pack 3 -->
+        <div class="card">
+            <div class="badge">50% OFF</div>
+            <div class="card-header">
+                <i class="fas fa-coins"></i>
+                <div class="uc-amount">660 UC</div>
+                <div class="bonus-info">(600 + 60 Bonus)</div>
+            </div>
+            <div class="price-box">
+                <div class="old-price">₹750</div>
+                <div class="new-price">₹375</div>
+            </div>
+            <button class="btn-locked">Unlocks Feb 15</button>
+        </div>
+
+        <!-- Pack 4 -->
+        <div class="card">
+            <div class="badge">50% OFF</div>
+            <div class="card-header">
+                <i class="fas fa-coins"></i>
+                <div class="uc-amount">1800 UC</div>
+                <div class="bonus-info">(1500 + 300 Bonus)</div>
+            </div>
+            <div class="price-box">
+                <div class="old-price">₹1,900</div>
+                <div class="new-price">₹950</div>
+            </div>
+            <button class="btn-locked">Unlocks Feb 15</button>
+        </div>
+
+        <!-- Pack 5 -->
+        <div class="card">
+            <div class="badge">BEST VALUE</div>
+            <div class="card-header">
+                <i class="fas fa-coins"></i>
+                <div class="uc-amount">3850 UC</div>
+                <div class="bonus-info">(3000 + 850 Bonus)</div>
+            </div>
+            <div class="price-box">
+                <div class="old-price">₹3,800</div>
+                <div class="new-price">₹1,900</div>
+            </div>
+            <button class="btn-locked">Unlocks Feb 15</button>
+        </div>
+
+        <!-- Pack 6 -->
+        <div class="card">
+            <div class="badge">WHALE PACK</div>
+            <div class="card-header">
+                <i class="fas fa-coins"></i>
+                <div class="uc-amount">8100 UC</div>
+                <div class="bonus-info">(6000 + 2100 Bonus)</div>
+            </div>
+            <div class="price-box">
+                <div class="old-price">₹7,500</div>
+                <div class="new-price">₹3,750</div>
+            </div>
+            <button class="btn-locked">Unlocks Feb 15</button>
+        </div>
+    </section>
+
+    <section class="registration">
+        <div class="registration-content">
+            <h3 class="gaming-font">DON'T MISS OUT!</h3>
+            <p>Enter your email to get early access and notification when the sale goes live. Hurry up!</p>
+            <div class="form-group">
+                <input type="email" id="userEmail" placeholder="Enter your email address">
+                <button class="btn-submit" onclick="handleNotify()">Notify Me</button>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 BGMI UC DISCOUNT CENTER. All Rights Reserved.</p>
+        <p style="font-size: 0.6rem; margin-top: 10px; letter-spacing: 2px;">AUTHORIZED PROMOTIONAL PARTNER</p>
+    </footer>
 
     <script>
-        const canvas = document.getElementById('mainCanvas');
-        const ctx = canvas.getContext('2d');
-        const overlay = document.getElementById('overlay');
-        const heartUI = document.getElementById('heart-ui');
+        // Set the countdown date
+        const targetDate = new Date("February 15, 2026 00:00:00").getTime();
 
-        let width, height, particles = [], points = [], stars = [], kittens = [];
-        let animationActive = false;
-        let audioCtx;
-        const apiKey = ""; 
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const gap = targetDate - now;
 
-        // YouTube API Setup
-        let player;
-        const tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            // Time math
+            const second = 1000;
+            const minute = second * 60;
+            const hour = minute * 60;
+            const day = hour * 24;
 
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('yt-player', {
-                height: '0',
-                width: '0',
-                videoId: 'kffacxfA7G4', // Justin Bieber - Baby
-                playerVars: {
-                    'autoplay': 0,
-                    'controls': 0,
-                    'start': 45 // Start near the chorus for maximum impact
-                },
-                events: {
-                    'onReady': onPlayerReady
-                }
-            });
-        }
+            const d = Math.floor(gap / day);
+            const h = Math.floor((gap % day) / hour);
+            const m = Math.floor((gap % hour) / minute);
+            const s = Math.floor((gap % minute) / second);
 
-        function onPlayerReady(event) {
-            // Player is ready but won't play until explosion
-        }
+            // Update UI
+            document.getElementById('days').innerText = d < 10 ? "0" + d : d;
+            document.getElementById('hours').innerText = h < 10 ? "0" + h : h;
+            document.getElementById('minutes').innerText = m < 10 ? "0" + m : m;
+            document.getElementById('seconds').innerText = s < 10 ? "0" + s : s;
 
-        function createStars() {
-            stars = [];
-            for(let i=0; i<80; i++) {
-                stars.push({ x: Math.random() * width, y: Math.random() * height, size: Math.random() * 2, speed: Math.random() * 0.5 + 0.2, opacity: Math.random() });
+            // If time is up
+            if (gap < 0) {
+                clearInterval(timerInterval);
+                document.querySelector('.countdown-container').innerHTML = "<h1 style='color: #f59e0b; font-size: 3rem;'>SALE IS NOW LIVE!</h1>";
             }
         }
 
-        class MagicalKitten {
-            constructor() {
-                this.reset();
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-            }
-            reset() {
-                this.x = width / 2;
-                this.y = height / 2;
-                const ang = Math.random() * Math.PI * 2;
-                const force = Math.random() * 5 + 2;
-                this.vx = Math.cos(ang) * force;
-                this.vy = Math.sin(ang) * force;
-                this.emoji = ['🐱', '🐈', '🐾', '🎀', '✨'][Math.floor(Math.random() * 5)];
-                this.size = Math.random() * 20 + 20;
-                this.rotation = 0;
-                this.rotSpeed = (Math.random() - 0.5) * 0.05;
-                this.alpha = 0;
-            }
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                this.rotation += this.rotSpeed;
-                if(this.alpha < 1) this.alpha += 0.02;
-                this.vx += Math.sin(Date.now() * 0.001) * 0.05;
-                this.vy += Math.cos(Date.now() * 0.001) * 0.05;
-                if (this.x < -50) this.x = width + 50;
-                if (this.x > width + 50) this.x = -50;
-                if (this.y < -50) this.y = height + 50;
-                if (this.y > height + 50) this.y = -50;
-            }
-            draw() {
-                ctx.save();
-                ctx.globalAlpha = this.alpha;
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.rotation);
-                ctx.font = `${this.size}px serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(this.emoji, 0, 0);
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = "pink";
-                ctx.restore();
+        const timerInterval = setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        function handleNotify() {
+            const email = document.getElementById('userEmail').value;
+            if(email) {
+                alert("Success! We will notify " + email + " when the sale starts on Feb 15.");
+                document.getElementById('userEmail').value = "";
+            } else {
+                alert("Please enter a valid email address.");
             }
         }
-
-        function initExperience() {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            overlay.style.opacity = '0';
-            setTimeout(() => {
-                overlay.style.display = 'none';
-                heartUI.style.display = 'block';
-                startHeartbeat();
-            }, 800);
-            calculateText();
-            createStars();
-            requestAnimationFrame(bgLoop);
-        }
-
-        function bgLoop() {
-            if(animationActive) return;
-            ctx.clearRect(0,0,width,height);
-            drawStars();
-            requestAnimationFrame(bgLoop);
-        }
-
-        function drawStars() {
-            stars.forEach(s => {
-                ctx.fillStyle = `rgba(255, 255, 255, ${s.opacity})`;
-                ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI*2); ctx.fill();
-                s.y -= s.speed; if(s.y < 0) s.y = height;
-            });
-        }
-
-        function calculateText() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-            const tCanvas = document.createElement('canvas');
-            const tCtx = tCanvas.getContext('2d');
-            tCanvas.width = width; tCanvas.height = height;
-            let size = width < 600 ? 35 : 70;
-            tCtx.fillStyle = 'white';
-            tCtx.font = `bold ${size}px 'Dancing Script'`;
-            tCtx.textAlign = 'center'; tCtx.textBaseline = 'middle';
-            const text = "I LOVE YOU BENAZIR";
-            tCtx.fillText(text, width / 2, height / 2);
-            const data = tCtx.getImageData(0, 0, width, height).data;
-            points = [];
-            const gap = width < 600 ? 3 : 5;
-            for (let y = 0; y < height; y += gap) {
-                for (let x = 0; x < width; x += gap) {
-                    const i = (y * width + x) * 4;
-                    if (data[i + 3] > 128) points.push({ x, y });
-                }
-            }
-        }
-
-        class HeartParticle {
-            constructor(startX, startY) {
-                this.x = startX; this.y = startY;
-                this.destX = startX; this.destY = startY;
-                this.size = Math.random() * 2 + 2;
-                const colors = ['#ff0040', '#ff85a1', '#fbb1bd', '#ffd700'];
-                this.color = colors[Math.floor(Math.random() * colors.length)];
-                const ang = Math.random() * Math.PI * 2;
-                const force = Math.random() * 25 + 5;
-                this.vx = Math.cos(ang) * force; this.vy = Math.sin(ang) * force;
-                this.friction = 0.94; this.mode = 'blast';
-            }
-            update() {
-                if (this.mode === 'blast') {
-                    this.x += this.vx; this.y += this.vy;
-                    this.vx *= this.friction; this.vy *= this.friction;
-                    if (Math.abs(this.vx) < 0.1) this.mode = 'settle';
-                } else {
-                    this.x += (this.destX - this.x) * 0.06;
-                    this.y += (this.destY - this.y) * 0.06;
-                }
-            }
-            draw() {
-                ctx.fillStyle = this.color;
-                const s = this.size;
-                ctx.beginPath(); ctx.moveTo(this.x, this.y);
-                ctx.bezierCurveTo(this.x, this.y-s, this.x-s, this.y-s, this.x-s, this.y);
-                ctx.bezierCurveTo(this.x-s, this.y+s, this.x, this.y+s, this.x, this.y+s*1.5);
-                ctx.bezierCurveTo(this.x, this.y+s, this.x+s, this.y+s, this.x+s, this.y);
-                ctx.bezierCurveTo(this.x+s, this.y-s, this.x, this.y-s, this.x, this.y);
-                ctx.fill();
-            }
-        }
-
-        function explode() {
-            if (animationActive) return;
-            animationActive = true;
-            heartUI.style.opacity = '0';
-            stopHeartbeat();
-            playExplosionSound();
-            speak();
-
-            // Start Justin Bieber - Baby
-            if (player && player.playVideo) {
-                player.setVolume(40); // 40% volume taake voice bhi sunai de
-                player.playVideo();
-            }
-
-            for(let i=0; i<8; i++) {
-                kittens.push(new MagicalKitten());
-            }
-
-            particles = points.map(p => {
-                const h = new HeartParticle(width / 2, height / 2);
-                h.destX = p.x; h.destY = p.y;
-                return h;
-            });
-            mainLoop();
-        }
-
-        function mainLoop() {
-            ctx.fillStyle = 'rgba(5, 0, 5, 0.2)';
-            ctx.fillRect(0, 0, width, height);
-            drawStars();
-            kittens.forEach(k => { k.update(); k.draw(); });
-            particles.forEach(p => { p.update(); p.draw(); });
-            requestAnimationFrame(mainLoop);
-        }
-
-        let hInterval;
-        function startHeartbeat() {
-            const pulse = () => {
-                if(!audioCtx) return;
-                const o = audioCtx.createOscillator();
-                const g = audioCtx.createGain();
-                o.type = 'sine'; o.frequency.setValueAtTime(50, audioCtx.currentTime);
-                g.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-                o.connect(g); g.connect(audioCtx.destination);
-                o.start(); o.stop(audioCtx.currentTime + 0.1);
-            };
-            hInterval = setInterval(() => { pulse(); setTimeout(pulse, 200); }, 900);
-        }
-
-        function stopHeartbeat() { clearInterval(hInterval); }
-
-        function playExplosionSound() {
-            const noise = audioCtx.createBufferSource();
-            const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate, audioCtx.sampleRate);
-            const data = buffer.getChannelData(0);
-            for(let i=0; i<audioCtx.sampleRate; i++) data[i] = Math.random() * 2 - 1;
-            noise.buffer = buffer;
-            const filt = audioCtx.createBiquadFilter();
-            filt.type = 'lowpass'; filt.frequency.setValueAtTime(800, audioCtx.currentTime);
-            filt.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 1);
-            const g = audioCtx.createGain();
-            g.gain.setValueAtTime(0.5, audioCtx.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1);
-            noise.connect(filt); filt.connect(g); g.connect(audioCtx.destination);
-            noise.start();
-        }
-
-        async function speak() {
-            const payload = {
-                contents: [{ parts: [{ text: "Say cheerfully: Meow! I love you so much, Benazir Fatima!" }] }],
-                generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } } },
-                model: "gemini-2.5-flash-preview-tts"
-            };
-            try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const r = await res.json();
-                const b64 = r.candidates[0].content.parts[0].inlineData.data;
-                const audio = new Audio(URL.createObjectURL(pcmToWav(b64, 24000)));
-                audio.play();
-            } catch(e) {}
-        }
-
-        function pcmToWav(b64, sr) {
-            const pcm = Uint8Array.from(atob(b64), c => c.charCodeAt(0)).buffer;
-            const buf = new ArrayBuffer(44 + pcm.byteLength);
-            const v = new DataView(buf);
-            const s = (o, str) => { for(let i=0; i<str.length; i++) v.setUint8(o+i, str.charCodeAt(i)) };
-            s(0, 'RIFF'); v.setUint32(4, 32 + pcm.byteLength, true); s(8, 'WAVE');
-            s(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true);
-            v.setUint16(22, 1, true); v.setUint32(24, sr, true);
-            v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true);
-            v.setUint16(34, 16, true); s(36, 'data'); v.setUint32(40, pcm.byteLength, true);
-            new Uint8Array(buf, 44).set(new Uint8Array(pcm));
-            return new Blob([buf], { type: 'audio/wav' });
-        }
-
-        window.addEventListener('resize', () => { calculateText(); createStars(); });
     </script>
 </body>
 </html>
