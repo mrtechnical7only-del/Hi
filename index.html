@@ -23,7 +23,7 @@
         .header { font-size: 24px; border-bottom: 2px dashed #0f0; padding-bottom: 10px; margin-bottom: 20px; text-shadow: 0 0 5px #0f0; display: flex; justify-content: space-between; }
         .blink { animation: blinker 1s linear infinite; color: red; text-shadow: 0 0 10px red; }
         @keyframes blinker { 50% { opacity: 0; } }
-        .terminal-text { font-size: 18px; line-height: 1.8; white-space: pre-wrap; text-shadow: 0 0 3px #0f0; }
+        .terminal-text { font-size: 16px; line-height: 1.6; white-space: pre-wrap; text-shadow: 0 0 3px #0f0; }
         .overlay-grid { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px); background-size: 30px 30px; z-index: 1; pointer-events: none; }
     </style>
 </head>
@@ -38,7 +38,7 @@
 
     <div class="terminal-container">
         <div class="header">
-            <span>DATABASE SEARCH</span>
+            <span>RAILWAY DB SEARCH</span>
             <span id="status-indicator">SCANNING...</span>
         </div>
         <div class="terminal-text" id="terminal"></div>
@@ -56,28 +56,36 @@
         let scanTimer = null;
         let typingStarted = false;
 
+        // Aaqib ki real details PDF se
         const targetDetails = [
-            "> ANALYZING BIOMETRICS...",
-            "> CROSS-REFERENCING DATABASE...",
-            "> MATCH FOUND! 99.9% ACCURACY.",
+            "> EXTRACTING BIOMETRICS...",
+            "> ACCESSING RRB SECUNDERABAD DB...",
+            "> MATCH FOUND! 100% ACCURACY.",
             " ",
             "---------------------------------",
-            " IDENTIFICATION DATA",
+            " CLASSIFIED IDENTIFICATION DATA",
             "---------------------------------",
-            " NAME        : Hippo",
-            " AGE         : 30",
-            " ADDRESS     : Killa road nanded,",
-            "               Maharashtra 431602",
-            " MOBILE DEV. : Oneplus",
-            " MOBILE NO.  : 8855931702",
+            " NAME        : AAQIB AHMED KHAN",
+            " D.O.B       : 20-01-2000 (Age 26)",
+            " REG NUMBER  : W42524156061",
+            " MOBILE NO.  : 7264950696",
+            " EMAIL ID    : aqibkhan2484@gmail.com",
+            " MARITAL STS : Unmarried",
+            " ADDRESS     : H No 9-4-836,",
+            "               Near Peeli Building,",
+            "               Mandhai Chaupala Road,",
+            "               Nanded, MH 431604",
+            " ",
+            " WARNING     : FINANCIAL LINK DETECTED!",
+            " BANK LINK   : Mohammed Moid Mudassir",
             "---------------------------------",
             " ",
-            "> TARGET LOCKED 🔴"
+            "> TARGET FULLY LOCKED 🔴"
         ];
 
         async function typeWriterEffect(lines) {
             terminalInfo.innerHTML = "";
-            statusIndicator.innerText = "MATCH FOUND";
+            statusIndicator.innerText = "TARGET LOCKED";
             statusIndicator.className = "blink";
             laser.style.backgroundColor = "rgba(255, 0, 0, 0.8)"; 
             laser.style.boxShadow = "0 0 15px 5px rgba(255, 0, 0, 0.5)";
@@ -85,13 +93,20 @@
             for (let i = 0; i < lines.length; i++) {
                 let currentLine = lines[i];
                 let lineDiv = document.createElement('div');
+                
+                // Moid wala line highlight karne ke liye
+                if (currentLine.includes("WARNING")) {
+                    lineDiv.style.color = "yellow";
+                    lineDiv.style.textShadow = "0 0 5px yellow";
+                }
+                
                 terminalInfo.appendChild(lineDiv);
                 
                 for (let j = 0; j < currentLine.length; j++) {
                     lineDiv.innerHTML += currentLine.charAt(j);
-                    await new Promise(r => setTimeout(r, 30)); 
+                    await new Promise(r => setTimeout(r, 20)); // Typing speed thodi fast ki hai
                 }
-                await new Promise(r => setTimeout(r, 200)); 
+                await new Promise(r => setTimeout(r, 150)); 
             }
         }
 
@@ -101,11 +116,9 @@
             canvasCtx.save();
             canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
-            // Jab Face mil jaye
             if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
                 const landmarks = results.multiFaceLandmarks[0];
 
-                // Face ke points nikalna box banane ke liye
                 let minX = 1, minY = 1, maxX = 0, maxY = 0;
                 for (const landmark of landmarks) {
                     if (landmark.x < minX) minX = landmark.x;
@@ -114,20 +127,17 @@
                     if (landmark.y > maxY) maxY = landmark.y;
                 }
                 
-                const padding = 30; // Box ko thoda bada rakhne ke liye
+                const padding = 30; 
                 const x = minX * canvasElement.width - padding;
                 const y = minY * canvasElement.height - padding * 1.5;
                 const w = (maxX - minX) * canvasElement.width + padding * 2;
                 const h = (maxY - minY) * canvasElement.height + padding * 3;
 
-                // Color decide karna (Pehle green, lock hone par red)
                 const mainColor = isLocked ? "#ff0000" : "#00ff00";
                 const meshColor = isLocked ? "rgba(255, 0, 0, 0.4)" : "rgba(0, 255, 0, 0.4)";
 
-                // ✅ MAIN MAGIC: Face par points aur lines (Mesh) draw karna
                 drawConnectors(canvasCtx, landmarks, FACEMESH_TESSELATION, {color: meshColor, lineWidth: 1});
 
-                // Face ke gird Sci-fi Box
                 canvasCtx.strokeStyle = mainColor;
                 canvasCtx.lineWidth = 3;
                 const cornerLength = 30;
@@ -138,7 +148,6 @@
                 canvasCtx.moveTo(x + w - cornerLength, y + h); canvasCtx.lineTo(x + w, y + h); canvasCtx.lineTo(x + w, y + h - cornerLength);
                 canvasCtx.stroke();
 
-                // 2 second baad lock karna
                 if (!isLocked && !scanTimer) {
                     scanTimer = setTimeout(() => {
                         isLocked = true;
@@ -157,19 +166,17 @@
             canvasCtx.restore();
         }
 
-        // Face Mesh Setup
         const faceMesh = new FaceMesh({locateFile: (file) => {
             return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
         }});
         faceMesh.setOptions({
-            maxNumFaces: 1, // Ek waqt mein 1 face
+            maxNumFaces: 1, 
             refineLandmarks: true,
             minDetectionConfidence: 0.5,
             minTrackingConfidence: 0.5
         });
         faceMesh.onResults(onResults);
 
-        // Start Camera
         const camera = new Camera(videoElement, {
             onFrame: async () => {
                 await faceMesh.send({image: videoElement});
