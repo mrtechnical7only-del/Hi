@@ -3,523 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BGMI UC Mega Sale - 50% OFF</title>
-    <!-- External Fonts and Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
-    
+    <title>AI Virtual Painter</title>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
     <style>
-        /* CSS Variables for colors */
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --primary-amber: #f59e0b;
-            --accent-red: #ef4444;
-            --text-white: #ffffff;
-            --text-slate: #94a3b8;
-            --border-color: rgba(255, 255, 255, 0.1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            background-color: var(--bg-color);
-            color: var(--text-white);
-            font-family: 'Rajdhani', sans-serif;
-            overflow-x: hidden;
-        }
-
-        .gaming-font {
-            font-family: 'Orbitron', sans-serif;
-        }
-
-        /* Header Styles */
-        header {
-            padding: 2rem 1rem;
-            text-align: center;
-            border-bottom: 1px solid #1e293b;
-        }
-
-        .logo {
-            font-size: 2.5rem;
-            font-weight: bold;
-            font-style: italic;
-            letter-spacing: -2px;
-        }
-
-        .logo span {
-            color: var(--primary-amber);
-        }
-
-        .sub-header {
-            color: var(--text-slate);
-            margin-top: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            font-size: 0.8rem;
-        }
-
-        /* Marquee Alert */
-        .alert-banner {
-            background: var(--accent-red);
-            color: white;
-            padding: 0.75rem 0;
-            font-weight: bold;
+            margin: 0;
             overflow: hidden;
-            white-space: nowrap;
+            background-color: #111;
+            font-family: sans-serif;
         }
-
-        .marquee {
-            display: inline-block;
-            padding-left: 100%;
-            animation: marquee 20s linear infinite;
-            text-transform: uppercase;
-        }
-
-        @keyframes marquee {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(-100%, 0); }
-        }
-
-        /* Hero Section */
-        .hero {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 4rem 1rem;
-            text-align: center;
-        }
-
-        .hero h2 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-        }
-
-        .gradient-text {
-            background: linear-gradient(90deg, var(--primary-amber), var(--accent-red));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero-desc {
-            font-size: 1.25rem;
-            color: var(--text-slate);
-            max-width: 700px;
-            margin: 0 auto 2.5rem auto;
-        }
-
-        /* Countdown Grid */
-        .countdown-container {
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            margin-bottom: 2.5rem;
-        }
-
-        .timer-box {
-            background: rgba(239, 68, 68, 0.15);
-            border: 1px solid var(--accent-red);
-            padding: 1.5rem;
-            border-radius: 1rem;
-            min-width: 100px;
-        }
-
-        .timer-box .val {
-            font-size: 2.5rem;
-            font-weight: bold;
-            display: block;
-        }
-
-        .timer-box .label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            color: var(--accent-red);
-            font-weight: bold;
-        }
-
-        .sale-date {
-            color: var(--accent-red);
-            font-weight: bold;
-            margin-bottom: 3rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.6; }
-            100% { opacity: 1; }
-        }
-
-        /* Pricing Grid */
-        .pricing-section {
-            max-width: 1100px;
-            margin: 0 auto 5rem auto;
-            padding: 0 1rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border-color);
-            padding: 2rem;
-            border-radius: 1.5rem;
-            position: relative;
-            transition: transform 0.3s ease, border-color 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary-amber);
-        }
-
-        .badge {
+        /* Video aur canvas ko screen par set karna aur mirror effect dena */
+        .input_video { display: none; }
+        .output_canvas {
             position: absolute;
-            top: 0;
-            right: 0;
-            background: var(--primary-amber);
-            color: black;
-            padding: 0.4rem 1.2rem;
-            font-weight: bold;
-            border-bottom-left-radius: 1rem;
-            font-size: 0.8rem;
+            width: 100vw;
+            height: 100vh;
+            transform: scaleX(-1); /* Screen ko mirror karne ke liye */
         }
-
-        .card-header {
-            text-align: center;
-            margin-bottom: 2rem;
+        .controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
         }
-
-        .card-header i {
-            font-size: 2.5rem;
-            color: var(--primary-amber);
-            margin-bottom: 0.5rem;
-        }
-
-        .uc-amount {
-            font-size: 1.75rem;
-            font-weight: bold;
-        }
-
-        .bonus-info {
-            color: var(--primary-amber);
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-
-        .price-box {
-            background: rgba(15, 23, 42, 0.6);
-            padding: 1rem;
-            border-radius: 1rem;
-            border: 1px solid #1e293b;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .old-price {
-            text-decoration: line-through;
-            color: var(--text-slate);
-            font-size: 1.1rem;
-        }
-
-        .new-price {
-            font-size: 2rem;
-            font-weight: bold;
-        }
-
-        .btn-locked {
-            width: 100%;
-            margin-top: 1.5rem;
-            padding: 1rem;
-            border-radius: 1rem;
-            background: #1e293b;
-            color: #475569;
-            border: none;
-            font-weight: bold;
-            cursor: not-allowed;
-            text-transform: uppercase;
-        }
-
-        /* Registration Section */
-        .registration {
-            background: rgba(30, 41, 59, 0.4);
-            padding: 5rem 1rem;
-            text-align: center;
-        }
-
-        .registration-content {
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        .registration h3 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-
-        .registration p {
-            color: var(--text-slate);
-            margin-bottom: 2rem;
-            font-style: italic;
-        }
-
-        .form-group {
-            display: flex;
-            gap: 10px;
-        }
-
-        input[type="email"] {
-            flex: 1;
-            padding: 1rem;
-            border-radius: 0.75rem;
-            background: #0f172a;
-            border: 1px solid #1e293b;
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #ff4757;
             color: white;
-            outline: none;
-        }
-
-        input[type="email"]:focus {
-            border-color: var(--primary-amber);
-        }
-
-        .btn-submit {
-            padding: 1rem 2rem;
-            background: var(--primary-amber);
-            color: black;
-            font-weight: bold;
-            border-radius: 0.75rem;
             border: none;
+            border-radius: 5px;
             cursor: pointer;
-            transition: 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
-
-        .btn-submit:hover {
-            background: #fbbf24;
-        }
-
-        /* Footer */
-        footer {
-            padding: 3rem 1rem;
-            text-align: center;
-            color: #475569;
-            border-top: 1px solid #1e293b;
-        }
-
-        @media (max-width: 768px) {
-            .hero h2 { font-size: 2.5rem; }
-            .countdown-container { gap: 0.5rem; }
-            .timer-box { min-width: 70px; padding: 1rem; }
-            .form-group { flex-direction: column; }
-        }
+        button:hover { background-color: #ff6b81; }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo gaming-font">BGMI <span>UC STORE</span></div>
-        <p class="sub-header">Official Authorized Discount Partner</p>
-    </header>
-
-    <div class="alert-banner">
-        <div class="marquee">
-            ⚡ HURRY UP! LIMITED PERIOD OFFER - 50% DISCOUNT ON ALL PACKS! SALE STARTS FEB 15, 2026! ⚡ SAME DAY DELIVERY GUARANTEED! ⚡
-        </div>
+    <div class="controls">
+        <button onclick="clearCanvas()">Clear Screen</button>
     </div>
 
-    <section class="hero">
-        <h2 class="gaming-font">MEGA <span class="gradient-text">DISCOUNT SALE</span></h2>
-        <p class="hero-desc">
-            The biggest event in BGMI history is almost here. All UC packs will be available at exactly half price. Be ready!
-        </p>
-
-        <div class="countdown-container">
-            <div class="timer-box">
-                <span class="val" id="days">00</span>
-                <span class="label">Days</span>
-            </div>
-            <div class="timer-box">
-                <span class="val" id="hours">00</span>
-                <span class="label">Hrs</span>
-            </div>
-            <div class="timer-box">
-                <span class="val" id="minutes">00</span>
-                <span class="label">Min</span>
-            </div>
-            <div class="timer-box">
-                <span class="val" id="seconds">00</span>
-                <span class="label">Sec</span>
-            </div>
-        </div>
-
-        <div class="sale-date">
-            <i class="fas fa-calendar-alt"></i>
-            <span>SALE STARTING ON: 15 FEBRUARY 2026</span>
-        </div>
-    </section>
-
-    <section class="pricing-section">
-        <!-- Pack 1 -->
-        <div class="card">
-            <div class="badge">50% OFF</div>
-            <div class="card-header">
-                <i class="fas fa-coins"></i>
-                <div class="uc-amount">60 UC</div>
-            </div>
-            <div class="price-box">
-                <div class="old-price">₹75</div>
-                <div class="new-price">₹37</div>
-            </div>
-            <button class="btn-locked">Unlocks Feb 15</button>
-        </div>
-
-        <!-- Pack 2 -->
-        <div class="card" style="border-color: rgba(245, 158, 11, 0.4)">
-            <div class="badge" style="background: #ef4444; color: white;">POPULAR</div>
-            <div class="card-header">
-                <i class="fas fa-coins"></i>
-                <div class="uc-amount">325 UC</div>
-                <div class="bonus-info">(300 + 25 Bonus)</div>
-            </div>
-            <div class="price-box">
-                <div class="old-price">₹380</div>
-                <div class="new-price">₹190</div>
-            </div>
-            <button class="btn-locked">Unlocks Feb 15</button>
-        </div>
-
-        <!-- Pack 3 -->
-        <div class="card">
-            <div class="badge">50% OFF</div>
-            <div class="card-header">
-                <i class="fas fa-coins"></i>
-                <div class="uc-amount">660 UC</div>
-                <div class="bonus-info">(600 + 60 Bonus)</div>
-            </div>
-            <div class="price-box">
-                <div class="old-price">₹750</div>
-                <div class="new-price">₹375</div>
-            </div>
-            <button class="btn-locked">Unlocks Feb 15</button>
-        </div>
-
-        <!-- Pack 4 -->
-        <div class="card">
-            <div class="badge">50% OFF</div>
-            <div class="card-header">
-                <i class="fas fa-coins"></i>
-                <div class="uc-amount">1800 UC</div>
-                <div class="bonus-info">(1500 + 300 Bonus)</div>
-            </div>
-            <div class="price-box">
-                <div class="old-price">₹1,900</div>
-                <div class="new-price">₹950</div>
-            </div>
-            <button class="btn-locked">Unlocks Feb 15</button>
-        </div>
-
-        <!-- Pack 5 -->
-        <div class="card">
-            <div class="badge">BEST VALUE</div>
-            <div class="card-header">
-                <i class="fas fa-coins"></i>
-                <div class="uc-amount">3850 UC</div>
-                <div class="bonus-info">(3000 + 850 Bonus)</div>
-            </div>
-            <div class="price-box">
-                <div class="old-price">₹3,800</div>
-                <div class="new-price">₹1,900</div>
-            </div>
-            <button class="btn-locked">Unlocks Feb 15</button>
-        </div>
-
-        <!-- Pack 6 -->
-        <div class="card">
-            <div class="badge">WHALE PACK</div>
-            <div class="card-header">
-                <i class="fas fa-coins"></i>
-                <div class="uc-amount">8100 UC</div>
-                <div class="bonus-info">(6000 + 2100 Bonus)</div>
-            </div>
-            <div class="price-box">
-                <div class="old-price">₹7,500</div>
-                <div class="new-price">₹3,750</div>
-            </div>
-            <button class="btn-locked">Unlocks Feb 15</button>
-        </div>
-    </section>
-
-    <section class="registration">
-        <div class="registration-content">
-            <h3 class="gaming-font">DON'T MISS OUT!</h3>
-            <p>Enter your email to get early access and notification when the sale goes live. Hurry up!</p>
-            <div class="form-group">
-                <input type="email" id="userEmail" placeholder="Enter your email address">
-                <button class="btn-submit" onclick="handleNotify()">Notify Me</button>
-            </div>
-        </div>
-    </section>
-
-    <footer>
-        <p>&copy; 2026 BGMI UC DISCOUNT CENTER. All Rights Reserved.</p>
-        <p style="font-size: 0.6rem; margin-top: 10px; letter-spacing: 2px;">AUTHORIZED PROMOTIONAL PARTNER</p>
-    </footer>
+    <video class="input_video"></video>
+    <canvas class="output_canvas" width="1280" height="720"></canvas>
 
     <script>
-        // Set the countdown date
-        const targetDate = new Date("February 15, 2026 00:00:00").getTime();
+        const videoElement = document.querySelector('.input_video');
+        const canvasElement = document.querySelector('.output_canvas');
+        const canvasCtx = canvasElement.getContext('2d');
 
-        function updateCountdown() {
-            const now = new Date().getTime();
-            const gap = targetDate - now;
+        // Drawing save rakhne ke liye ek alag hidden canvas
+        const drawingCanvas = document.createElement('canvas');
+        drawingCanvas.width = 1280;
+        drawingCanvas.height = 720;
+        const drawingCtx = drawingCanvas.getContext('2d');
 
-            // Time math
-            const second = 1000;
-            const minute = second * 60;
-            const hour = minute * 60;
-            const day = hour * 24;
+        let prevX = null;
+        let prevY = null;
 
-            const d = Math.floor(gap / day);
-            const h = Math.floor((gap % day) / hour);
-            const m = Math.floor((gap % hour) / minute);
-            const s = Math.floor((gap % minute) / second);
-
-            // Update UI
-            document.getElementById('days').innerText = d < 10 ? "0" + d : d;
-            document.getElementById('hours').innerText = h < 10 ? "0" + h : h;
-            document.getElementById('minutes').innerText = m < 10 ? "0" + m : m;
-            document.getElementById('seconds').innerText = s < 10 ? "0" + s : s;
-
-            // If time is up
-            if (gap < 0) {
-                clearInterval(timerInterval);
-                document.querySelector('.countdown-container').innerHTML = "<h1 style='color: #f59e0b; font-size: 3rem;'>SALE IS NOW LIVE!</h1>";
-            }
+        // Screen saaf karne ka function
+        function clearCanvas() {
+            drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
         }
 
-        const timerInterval = setInterval(updateCountdown, 1000);
-        updateCountdown();
+        // Jab MediaPipe ko haath milta hai tab ye function run hota hai
+        function onResults(results) {
+            canvasCtx.save();
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            
+            // Webcam ka video draw karna
+            canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
 
-        function handleNotify() {
-            const email = document.getElementById('userEmail').value;
-            if(email) {
-                alert("Success! We will notify " + email + " when the sale starts on Feb 15.");
-                document.getElementById('userEmail').value = "";
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const landmarks = results.multiHandLandmarks[0];
+                
+                // Landmark 8 index finger (shahadat ki ungli) ka tip hota hai
+                const indexTip = landmarks[8]; 
+                
+                const x = indexTip.x * canvasElement.width;
+                const y = indexTip.y * canvasElement.height;
+
+                // Drawing Logic
+                if (prevX != null && prevY != null) {
+                    drawingCtx.beginPath();
+                    drawingCtx.moveTo(prevX, prevY);
+                    drawingCtx.lineTo(x, y);
+                    
+                    // Style aur Glow effect
+                    drawingCtx.strokeStyle = '#FFD700'; // Gold Color
+                    drawingCtx.lineWidth = 6;
+                    drawingCtx.lineCap = 'round';
+                    drawingCtx.shadowBlur = 15;
+                    drawingCtx.shadowColor = '#FFD700';
+                    
+                    drawingCtx.stroke();
+                }
+                prevX = x;
+                prevY = y;
+
+                // Haath par lines aur dots draw karna (video jaisa effect)
+                drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {color: '#ffffff', lineWidth: 2});
+                drawLandmarks(canvasCtx, landmarks, {color: '#FFD700', lineWidth: 1, radius: 3});
             } else {
-                alert("Please enter a valid email address.");
+                // Agar haath screen se hat jaye toh line break kar dena
+                prevX = null;
+                prevY = null;
             }
+
+            // Final drawing ko main screen par dikhana
+            canvasCtx.drawImage(drawingCanvas, 0, 0);
+            canvasCtx.restore();
         }
+
+        // MediaPipe Hands setup karna
+        const hands = new Hands({locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+        }});
+        
+        hands.setOptions({
+            maxNumHands: 1, // Ek waqt mein ek haath track karega
+            modelComplexity: 1,
+            minDetectionConfidence: 0.7,
+            minTrackingConfidence: 0.7
+        });
+        hands.onResults(onResults);
+
+        // Webcam on karna
+        const camera = new Camera(videoElement, {
+            onFrame: async () => {
+                await hands.send({image: videoElement});
+            },
+            width: 1280,
+            height: 720
+        });
+        camera.start();
     </script>
 </body>
 </html>
-
