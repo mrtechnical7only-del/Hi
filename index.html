@@ -10,21 +10,54 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
-        body { margin: 0; padding: 0; background-color: #050505; color: #0f0; font-family: 'Share Tech Mono', monospace; display: flex; height: 100vh; overflow: hidden; }
+        body { 
+            margin: 0; padding: 0; background-color: #050505; color: #0f0; 
+            font-family: 'Share Tech Mono', monospace; display: flex; 
+            height: 100vh; overflow: hidden; 
+            flex-direction: row; /* Desktop ke liye default */
+        }
 
-        .scanner-container { position: relative; width: 65%; height: 100%; border-right: 3px solid #0f0; box-shadow: inset 0 0 50px rgba(0, 255, 0, 0.2); display: flex; justify-content: center; align-items: center; background: #000; }
+        .scanner-container { 
+            position: relative; width: 65%; height: 100%; border-right: 3px solid #0f0; 
+            box-shadow: inset 0 0 50px rgba(0, 255, 0, 0.2); display: flex; 
+            justify-content: center; align-items: center; background: #000; 
+        }
+        
         .input_video { position: absolute; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.6; }
         .output_canvas { position: absolute; width: 100%; height: 100%; transform: scaleX(-1); z-index: 2; }
         
-        .laser { position: absolute; width: 100%; height: 4px; background-color: rgba(0, 255, 0, 0.8); box-shadow: 0 0 15px 5px rgba(0, 255, 0, 0.5); top: 0; left: 0; z-index: 3; animation: scan 3s linear infinite; }
+        .laser { 
+            position: absolute; width: 100%; height: 4px; background-color: rgba(0, 255, 0, 0.8); 
+            box-shadow: 0 0 15px 5px rgba(0, 255, 0, 0.5); top: 0; left: 0; z-index: 3; 
+            animation: scan 3s linear infinite; 
+        }
         @keyframes scan { 0% { top: 0%; } 50% { top: 100%; } 100% { top: 0%; } }
 
-        .terminal-container { width: 35%; padding: 20px; background: rgba(0, 10, 0, 0.9); display: flex; flex-direction: column; box-sizing: border-box; position: relative; }
-        .header { font-size: 24px; border-bottom: 2px dashed #0f0; padding-bottom: 10px; margin-bottom: 20px; text-shadow: 0 0 5px #0f0; display: flex; justify-content: space-between; }
+        .terminal-container { 
+            width: 35%; padding: 20px; background: rgba(0, 10, 0, 0.9); 
+            display: flex; flex-direction: column; box-sizing: border-box; position: relative; 
+        }
+        .header { 
+            font-size: 24px; border-bottom: 2px dashed #0f0; padding-bottom: 10px; 
+            margin-bottom: 20px; text-shadow: 0 0 5px #0f0; display: flex; justify-content: space-between; 
+        }
         .blink { animation: blinker 1s linear infinite; color: red; text-shadow: 0 0 10px red; }
         @keyframes blinker { 50% { opacity: 0; } }
         .terminal-text { font-size: 16px; line-height: 1.6; white-space: pre-wrap; text-shadow: 0 0 3px #0f0; }
-        .overlay-grid { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px); background-size: 30px 30px; z-index: 1; pointer-events: none; }
+        .overlay-grid { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background-image: linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px); 
+            background-size: 30px 30px; z-index: 1; pointer-events: none; 
+        }
+
+        /* 📱 MOBILE VIEW FIX */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .scanner-container { width: 100%; height: 50%; border-right: none; border-bottom: 3px solid #0f0; }
+            .terminal-container { width: 100%; height: 50%; padding: 15px; overflow-y: auto; }
+            .header { font-size: 18px; margin-bottom: 10px; }
+            .terminal-text { font-size: 13px; line-height: 1.4; }
+        }
     </style>
 </head>
 <body>
@@ -38,7 +71,7 @@
 
     <div class="terminal-container">
         <div class="header">
-            <span>RAILWAY DB SEARCH</span>
+            <span>CENTRAL DB SEARCH</span>
             <span id="status-indicator">SCANNING...</span>
         </div>
         <div class="terminal-text" id="terminal"></div>
@@ -56,28 +89,24 @@
         let scanTimer = null;
         let typingStarted = false;
 
-        // Aaqib ki real details PDF se
         const targetDetails = [
             "> EXTRACTING BIOMETRICS...",
-            "> ACCESSING RRB SECUNDERABAD DB...",
+            "> ACCESSING CENTRAL DATABASE...",
             "> MATCH FOUND! 100% ACCURACY.",
             " ",
             "---------------------------------",
             " CLASSIFIED IDENTIFICATION DATA",
             "---------------------------------",
-            " NAME        : AAQIB AHMED KHAN",
-            " D.O.B       : 20-01-2000 (Age 26)",
-            " REG NUMBER  : W42524156061",
-            " MOBILE NO.  : 7264950696",
-            " EMAIL ID    : aqibkhan2484@gmail.com",
-            " MARITAL STS : Unmarried",
-            " ADDRESS     : H No 9-4-836,",
-            "               Near Peeli Building,",
-            "               Mandhai Chaupala Road,",
-            "               Nanded, MH 431604",
-            " ",
-            " WARNING     : FINANCIAL LINK DETECTED!",
-            " BANK LINK   : Mohammed Moid Mudassir",
+            [span_0](start_span)" NAME        : AAQIB AHMED KHAN[span_0](end_span)",
+            [span_1](start_span)" D.O.B       : 20-01-2000 (Age 26)[span_1](end_span)",
+            [span_2](start_span)" REG NUMBER  : W42524156061[span_2](end_span)",
+            " MOBILE NO.  [span_3](start_span): 7264950696[span_3](end_span)",
+            [span_4](start_span)" EMAIL ID    : aqibkhan2484@gmail.com[span_4](end_span)",
+            [span_5](start_span)" MARITAL STS : Unmarried[span_5](end_span)",
+            [span_6](start_span)" ADDRESS     : H No 9-4-836,[span_6](end_span)",
+            [span_7](start_span)"               Near Peeli Building,[span_7](end_span)",
+            [span_8](start_span)"               Mandhai Chaupala Road,[span_8](end_span)",
+            [span_9](start_span)"               Nanded, MH 431604[span_9](end_span)",
             "---------------------------------",
             " ",
             "> TARGET FULLY LOCKED 🔴"
@@ -94,17 +123,11 @@
                 let currentLine = lines[i];
                 let lineDiv = document.createElement('div');
                 
-                // Moid wala line highlight karne ke liye
-                if (currentLine.includes("WARNING")) {
-                    lineDiv.style.color = "yellow";
-                    lineDiv.style.textShadow = "0 0 5px yellow";
-                }
-                
                 terminalInfo.appendChild(lineDiv);
                 
                 for (let j = 0; j < currentLine.length; j++) {
                     lineDiv.innerHTML += currentLine.charAt(j);
-                    await new Promise(r => setTimeout(r, 20)); // Typing speed thodi fast ki hai
+                    await new Promise(r => setTimeout(r, 20)); 
                 }
                 await new Promise(r => setTimeout(r, 150)); 
             }
