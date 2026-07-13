@@ -1,223 +1,776 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sci-Fi Face Scanner Prank</title>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+    <title>Smart BLO Form Reader AI</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-
-        body { 
-            margin: 0; padding: 0; background-color: #050505; color: #0f0; 
-            font-family: 'Share Tech Mono', monospace; display: flex; 
-            height: 100vh; overflow: hidden; 
-            flex-direction: column; /* Mobile ke liye by default column */
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
-
-        .scanner-container { 
-            position: relative; width: 100%; height: 50%; border-bottom: 3px solid #0f0; 
-            box-shadow: inset 0 0 50px rgba(0, 255, 0, 0.2); display: flex; 
-            justify-content: center; align-items: center; background: #000; 
+        /* Custom scrollbar styling for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
         }
-        
-        /* Object-fit contain se mobile par drawing misalign nahi hogi */
-        .input_video { position: absolute; width: 100%; height: 100%; object-fit: contain; opacity: 0.7; }
-        .output_canvas { position: absolute; width: 100%; height: 100%; object-fit: contain; z-index: 2; }
-        
-        .laser { 
-            position: absolute; width: 100%; height: 4px; background-color: rgba(0, 255, 0, 0.8); 
-            box-shadow: 0 0 15px 5px rgba(0, 255, 0, 0.5); top: 0; left: 0; z-index: 3; 
-            animation: scan 3s linear infinite; 
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
         }
-        @keyframes scan { 0% { top: 0%; } 50% { top: 100%; } 100% { top: 0%; } }
-
-        .terminal-container { 
-            width: 100%; height: 50%; padding: 15px; background: rgba(0, 10, 0, 0.9); 
-            display: flex; flex-direction: column; box-sizing: border-box; overflow-y: auto;
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
         }
-        
-        .header { 
-            font-size: 18px; border-bottom: 2px dashed #0f0; padding-bottom: 8px; 
-            margin-bottom: 15px; text-shadow: 0 0 5px #0f0; display: flex; justify-content: space-between; 
-        }
-        
-        .blink { animation: blinker 1s linear infinite; color: red; text-shadow: 0 0 10px red; }
-        @keyframes blinker { 50% { opacity: 0; } }
-        
-        .terminal-text { font-size: 14px; line-height: 1.5; white-space: pre-wrap; text-shadow: 0 0 3px #0f0; }
-        
-        .overlay-grid { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background-image: linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px); 
-            background-size: 30px 30px; z-index: 1; pointer-events: none; 
-        }
-
-        /* Desktop View ke liye adjustments */
-        @media (min-width: 768px) {
-            body { flex-direction: row; }
-            .scanner-container { width: 65%; height: 100%; border-right: 3px solid #0f0; border-bottom: none; }
-            .terminal-container { width: 35%; height: 100%; padding: 20px; }
-            .header { font-size: 24px; margin-bottom: 20px; }
-            .terminal-text { font-size: 16px; }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
         }
     </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-    <div class="scanner-container">
-        <div class="overlay-grid"></div>
-        <video class="input_video" autoplay playsinline></video>
-        <canvas class="output_canvas"></canvas>
-        <div class="laser" id="laser-line"></div>
-    </div>
-
-    <div class="terminal-container">
-        <div class="header">
-            <span>CENTRAL DB SEARCH</span>
-            <span id="status-indicator">SCANNING...</span>
+    <!-- Header / Top Bar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-md shadow-indigo-100 flex items-center justify-center">
+                    <i class="fa-solid fa-file-invoice text-xl animate-pulse"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900 tracking-tight">BLO Form Reader AI Pro</h1>
+                    <p class="text-xs text-slate-500">Live Camera, Auto-Correction aur High-Speed Extraction</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                    Ultra-Fast Mode Active
+                </span>
+            </div>
         </div>
-        <div class="terminal-text" id="terminal"></div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col lg:flex-row gap-8">
+        
+        <!-- Left Side: Upload Zone & Preview -->
+        <div class="w-full lg:w-5/12 flex flex-col gap-6">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
+                    <span class="bg-indigo-50 text-indigo-600 w-8 h-8 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </span>
+                    1. Form Capture Option
+                </h2>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <!-- Live Camera Button -->
+                    <button id="btn-open-camera" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center space-x-2 text-sm">
+                        <i class="fa-solid fa-camera"></i>
+                        <span>Live Camera</span>
+                    </button>
+                    <!-- File input proxy button -->
+                    <button id="btn-file-trigger" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center space-x-2 text-sm">
+                        <i class="fa-solid fa-images"></i>
+                        <span>Gallery/File</span>
+                    </button>
+                </div>
+
+                <!-- Hidden Input for File -->
+                <input type="file" id="file-input" accept="image/*" class="hidden" />
+
+                <!-- Drag and Drop Area as Fallback -->
+                <div id="drop-zone" class="border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-xl p-8 text-center cursor-pointer transition-all bg-slate-50 hover:bg-indigo-50/20 group relative">
+                    <div class="space-y-2">
+                        <p class="text-sm font-semibold text-slate-700">Ya fir file yahan drop karein</p>
+                        <p class="text-xs text-slate-400">Sabhi handwriting languages auto-supported hain</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Preview Box -->
+            <div id="preview-card" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 hidden">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center">
+                        <i class="fa-solid fa-eye text-indigo-600 mr-2"></i> Form Image Preview
+                    </h3>
+                    <button id="btn-remove-image" class="text-slate-400 hover:text-rose-500 text-xs flex items-center space-x-1">
+                        <i class="fa-solid fa-trash-can"></i>
+                        <span>Hataein</span>
+                    </button>
+                </div>
+                <div class="relative bg-slate-100 rounded-xl overflow-hidden border border-slate-200 flex items-center justify-center" style="min-h-64 max-h-96">
+                    <img id="image-preview" src="#" alt="Form Preview" class="object-contain max-h-96 w-full" />
+                </div>
+                
+                <!-- Action Button -->
+                <button id="btn-process" class="mt-5 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3.5 px-4 rounded-xl shadow-lg shadow-indigo-100 transition-all flex items-center justify-center space-x-2 text-base">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>AI se Details Extract Karein</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Side: Extracted Fields Dashboard -->
+        <div class="w-full lg:w-7/12 flex flex-col gap-6">
+            
+            <!-- Welcome State -->
+            <div id="result-placeholder" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-12 text-center flex-1 flex flex-col items-center justify-center">
+                <div class="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600 text-3xl mb-4">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800">Form Details Extraction Panel</h3>
+                <p class="text-sm text-slate-500 mt-2 max-w-md mx-auto">
+                    Camera se photo click karein ya upload karein. AI automatic saari hand-written details padh kar, spelling check karke English Capital Letters me convert kar dega.
+                </p>
+            </div>
+
+            <!-- Loader State -->
+            <div id="loader-state" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-12 text-center flex-1 flex flex-col items-center justify-center hidden">
+                <div class="relative flex items-center justify-center mb-6">
+                    <div class="animate-spin rounded-full h-16 w-16 border-4 border-slate-100 border-t-indigo-600"></div>
+                    <i class="fa-solid fa-bolt absolute text-indigo-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800 animate-pulse">High-Speed Processing...</h3>
+                <p id="loader-status" class="text-sm text-slate-500 mt-2">Form se handwriting analyze ki ja rahi hai...</p>
+            </div>
+
+            <!-- Results Panel (Active once details are loaded) -->
+            <div id="result-card" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 hidden flex flex-col h-full">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4 mb-6 gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 flex items-center">
+                            <span class="bg-emerald-50 text-emerald-600 w-8 h-8 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fa-solid fa-square-check"></i>
+                            </span>
+                            Extracted Form Data (English Capitals)
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-0.5">BLO entry ke liye saare naam English CAPITAL letters aur standard correct spelling me hain</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button id="btn-copy-all" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3.5 py-2 rounded-xl text-sm font-semibold flex items-center space-x-2 transition-all border border-indigo-100">
+                            <i class="fa-solid fa-copy"></i>
+                            <span>Copy All</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Form Fields List -->
+                <div class="space-y-5 flex-1 max-h-[550px] overflow-y-auto pr-2">
+                    
+                    <!-- Date of Birth (जन्म तारीख) -->
+                    <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:border-indigo-100 transition-colors group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">जन्म तारीख (DD/MM/YYYY) / Date of Birth</label>
+                        <div class="mt-1.5 flex items-center space-x-2">
+                            <input type="text" id="field-dob" class="form-input w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl px-3 py-2.5 text-sm font-medium transition-all" value="" />
+                            <button onclick="copyFieldValue('field-dob')" class="bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center w-11 h-11 flex-shrink-0" title="Copy Text">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Aadhaar Number (आधार क्रमांक) -->
+                    <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:border-indigo-100 transition-colors group">
+                        <div class="flex justify-between items-center">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">आधार क्रमांक (ऐच्छिक) / Aadhaar Number</label>
+                            <span id="aadhaar-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">0 digits</span>
+                        </div>
+                        <div class="mt-1.5 flex items-center space-x-2">
+                            <input type="text" id="field-aadhaar" class="form-input w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl px-3 py-2.5 text-sm font-medium transition-all" value="" placeholder="12-digit number" />
+                            <button onclick="copyFieldValue('field-aadhaar')" class="bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center w-11 h-11 flex-shrink-0" title="Copy Text">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                        <p id="error-aadhaar" class="text-xs text-rose-500 mt-1.5 hidden font-semibold flex items-center">
+                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> Aadhaar number 12 digits ka hona chahiye!
+                        </p>
+                    </div>
+
+                    <!-- Mobile Number (मोबाईल क्रमांक) -->
+                    <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:border-indigo-100 transition-colors group">
+                        <div class="flex justify-between items-center">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">मोबाईल क्रमांक / Mobile Number</label>
+                            <span id="mobile-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">0 digits</span>
+                        </div>
+                        <div class="mt-1.5 flex items-center space-x-2">
+                            <input type="text" id="field-mobile" class="form-input w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl px-3 py-2.5 text-sm font-medium transition-all" value="" placeholder="10-digit number" />
+                            <button onclick="copyFieldValue('field-mobile')" class="bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center w-11 h-11 flex-shrink-0" title="Copy Text">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                        <p id="error-mobile" class="text-xs text-rose-500 mt-1.5 hidden font-semibold flex items-center">
+                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> Mobile number strictly 10 digits ka hona chahiye!
+                        </p>
+                    </div>
+
+                    <!-- Father's/Guardian's Name -->
+                    <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:border-indigo-100 transition-colors group">
+                        <div class="flex justify-between items-center">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">वडिलांचे/पालकांचे नाव / Father's Name (English Capital)</label>
+                            <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 uppercase">Spelling Verified</span>
+                        </div>
+                        <div class="mt-1.5 flex items-center space-x-2">
+                            <input type="text" id="field-father" class="form-input w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl px-3 py-2.5 text-sm font-semibold tracking-wide uppercase transition-all" value="" />
+                            <button onclick="copyFieldValue('field-father')" class="bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center w-11 h-11 flex-shrink-0" title="Copy Text">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Father's Voter Card -->
+                    <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:border-indigo-100 transition-colors group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">वडिलांचा मतदार ओळखपत्र क्रमांक / Father's Voter Card No</label>
+                        <div class="mt-1.5 flex items-center space-x-2">
+                            <input type="text" id="field-father-voter" class="form-input w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl px-3 py-2.5 text-sm font-medium transition-all" value="" />
+                            <button onclick="copyFieldValue('field-father-voter')" class="bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center w-11 h-11 flex-shrink-0" title="Copy Text">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Mother's Name -->
+                    <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:border-indigo-100 transition-colors group">
+                        <div class="flex justify-between items-center">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">आईचे नाव / Mother's Name (English Capital)</label>
+                            <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 uppercase">Spelling Verified</span>
+                        </div>
+                        <div class="mt-1.5 flex items-center space-x-2">
+                            <input type="text" id="field-mother" class="form-input w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl px-3 py-2.5 text-sm font-semibold tracking-wide uppercase transition-all" value="" />
+                            <button onclick="copyFieldValue('field-mother')" class="bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center w-11 h-11 flex-shrink-0" title="Copy Text">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Mother's Voter Card -->
+                    <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:border-indigo-100 transition-colors group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">आईचा मतदार ओळखपत्र क्रमांक / Mother's Voter Card No</label>
+                        <div class="mt-1.5 flex items-center space-x-2">
+                            <input type="text" id="field-mother-voter" class="form-input w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl px-3 py-2.5 text-sm font-medium transition-all" value="" />
+                            <button onclick="copyFieldValue('field-mother-voter')" class="bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center w-11 h-11 flex-shrink-0" title="Copy Text">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Spouse Name -->
+                    <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:border-indigo-100 transition-colors group">
+                        <div class="flex justify-between items-center">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">पती किंवा पत्नीचे नाव / Spouse Name (English Capital)</label>
+                            <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 uppercase">Spelling Verified</span>
+                        </div>
+                        <div class="mt-1.5 flex items-center space-x-2">
+                            <input type="text" id="field-spouse" class="form-input w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl px-3 py-2.5 text-sm font-semibold tracking-wide uppercase transition-all" value="" />
+                            <button onclick="copyFieldValue('field-spouse')" class="bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center w-11 h-11 flex-shrink-0" title="Copy Text">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Spouse Voter Card -->
+                    <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:border-indigo-100 transition-colors group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">पती किंवा पत्नीचे मतदार ओळखपत्र क्रमांक / Spouse Voter Card No</label>
+                        <div class="mt-1.5 flex items-center space-x-2">
+                            <input type="text" id="field-spouse-voter" class="form-input w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl px-3 py-2.5 text-sm font-medium transition-all" value="" />
+                            <button onclick="copyFieldValue('field-spouse-voter')" class="bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center w-11 h-11 flex-shrink-0" title="Copy Text">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Fullscreen Camera Stream Overlay/Modal -->
+    <div id="camera-modal" class="fixed inset-0 bg-black/90 z-50 flex flex-col justify-between items-center hidden p-4">
+        <!-- Top Toolbar -->
+        <div class="w-full max-w-lg flex items-center justify-between text-white py-2">
+            <h3 class="text-sm font-bold flex items-center">
+                <i class="fa-solid fa-camera mr-2 animate-pulse text-indigo-500"></i> Place Form inside frame
+            </h3>
+            <button id="btn-close-camera" class="w-9 h-9 bg-slate-800 rounded-full flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Video Stream Container -->
+        <div class="relative w-full max-w-lg aspect-[3/4] bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl flex items-center justify-center">
+            <video id="video-feed" class="w-full h-full object-cover" autoplay playsinline muted></video>
+            <!-- Highlight Overlay Grid Frame for alignment -->
+            <div class="absolute inset-6 border-2 border-dashed border-indigo-500/50 rounded-xl pointer-events-none flex items-center justify-center">
+                <div class="text-[10px] text-indigo-400 bg-slate-900/80 px-2 py-1 rounded">Align form within this box</div>
+            </div>
+        </div>
+
+        <!-- Bottom Actions -->
+        <div class="w-full max-w-lg py-6 flex items-center justify-around">
+            <!-- Toggle Front/Back Camera -->
+            <button id="btn-switch-camera" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 text-white rounded-full flex items-center justify-center transition-all shadow">
+                <i class="fa-solid fa-camera-rotate text-lg"></i>
+            </button>
+            <!-- Main Capture Trigger -->
+            <button id="btn-capture-shutter" class="w-20 h-20 bg-white hover:bg-indigo-50 rounded-full flex items-center justify-center transition-all shadow-lg active:scale-95 border-4 border-indigo-600">
+                <div class="w-14 h-14 bg-indigo-600 rounded-full flex items-center justify-center text-white">
+                    <i class="fa-solid fa-camera text-xl"></i>
+                </div>
+            </button>
+            <!-- Spacer for alignment -->
+            <div class="w-12 h-12"></div>
+        </div>
     </div>
 
+    <!-- Hidden Canvas to handle stream rendering -->
+    <canvas id="hidden-canvas" class="hidden"></canvas>
+
+    <!-- Custom Toast Notification Box -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-xl flex items-center space-x-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50 pointer-events-none">
+        <div class="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xs">
+            <i class="fa-solid fa-check"></i>
+        </div>
+        <span id="toast-message" class="text-sm font-medium">Copied to clipboard!</span>
+    </div>
+
+    <!-- Script Block containing logical flow -->
     <script>
-        const videoElement = document.querySelector('.input_video');
-        const canvasElement = document.querySelector('.output_canvas');
-        const canvasCtx = canvasElement.getContext('2d');
-        const terminalInfo = document.getElementById('terminal');
-        const statusIndicator = document.getElementById('status-indicator');
-        const laser = document.getElementById('laser-line');
+        // Global Variables
+        const apiKey = ""; // Set dynamically by environment
+        let selectedImageBase64 = null;
+        let selectedImageMimeType = "image/jpeg";
+        let activeStream = null;
+        let currentFacingMode = "environment"; // Default to back camera for forms
 
-        let isLocked = false;
-        let scanTimer = null;
-        let typingStarted = false;
+        // DOM elements
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const btnFileTrigger = document.getElementById('btn-file-trigger');
+        const previewCard = document.getElementById('preview-card');
+        const imagePreview = document.getElementById('image-preview');
+        const btnRemoveImage = document.getElementById('btn-remove-image');
+        const btnProcess = document.getElementById('btn-process');
+        
+        const resultPlaceholder = document.getElementById('result-placeholder');
+        const loaderState = document.getElementById('loader-state');
+        const loaderStatus = document.getElementById('loader-status');
+        const resultCard = document.getElementById('result-card');
+        const btnCopyAll = document.getElementById('btn-copy-all');
 
-        const targetDetails = [
-            "> EXTRACTING BIOMETRICS...",
-            "> ACCESSING CENTRAL DATABASE...",
-            "> MATCH FOUND! 100% ACCURACY.",
-            " ",
-            "---------------------------------",
-            " CLASSIFIED IDENTIFICATION DATA",
-            "---------------------------------",
-            " NAME        : AAQIB AHMED KHAN",
-            " D.O.B       : 20-01-2000 (Age 26)",
-            " REG NUMBER  : W42524156061",
-            " MOBILE NO.  : 7264950696",
-            " EMAIL ID    : aqibkhan2484@gmail.com",
-            " MARITAL STS : Unmarried",
-            " ADDRESS     : H No 9-4-836,",
-            "               Near Peeli Building,",
-            "               Mandhai Chaupala Road,",
-            "               Nanded, MH 431604",
-            "---------------------------------",
-            " ",
-            "> TARGET FULLY LOCKED 🔴"
-        ];
+        // Camera DOM elements
+        const btnOpenCamera = document.getElementById('btn-open-camera');
+        const cameraModal = document.getElementById('camera-modal');
+        const btnCloseCamera = document.getElementById('btn-close-camera');
+        const btnSwitchCamera = document.getElementById('btn-switch-camera');
+        const btnCaptureShutter = document.getElementById('btn-capture-shutter');
+        const videoFeed = document.getElementById('video-feed');
+        const hiddenCanvas = document.getElementById('hidden-canvas');
 
-        async function typeWriterEffect(lines) {
-            terminalInfo.innerHTML = "";
-            statusIndicator.innerText = "TARGET LOCKED";
-            statusIndicator.className = "blink";
-            laser.style.backgroundColor = "rgba(255, 0, 0, 0.8)"; 
-            laser.style.boxShadow = "0 0 15px 5px rgba(255, 0, 0, 0.5)";
+        // Form Fields
+        const fields = {
+            dob: document.getElementById('field-dob'),
+            aadhaar: document.getElementById('field-aadhaar'),
+            mobile: document.getElementById('field-mobile'),
+            father: document.getElementById('field-father'),
+            fatherVoter: document.getElementById('field-father-voter'),
+            mother: document.getElementById('field-mother'),
+            motherVoter: document.getElementById('field-mother-voter'),
+            spouse: document.getElementById('field-spouse'),
+            spouseVoter: document.getElementById('field-spouse-voter')
+        };
 
-            for (let i = 0; i < lines.length; i++) {
-                let currentLine = lines[i];
-                let lineDiv = document.createElement('div');
+        // Validation Elements
+        const errorAadhaar = document.getElementById('error-aadhaar');
+        const errorMobile = document.getElementById('error-mobile');
+        const aadhaarBadge = document.getElementById('aadhaar-badge');
+        const mobileBadge = document.getElementById('mobile-badge');
+
+        // Live input validation listeners
+        fields.mobile.addEventListener('input', validateMobileField);
+        fields.aadhaar.addEventListener('input', validateAadhaarField);
+
+        // Auto uppercase for name fields during manual typing
+        const nameFields = [fields.father, fields.mother, fields.spouse];
+        nameFields.forEach(field => {
+            field.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+        });
+
+        // Trigger input file selection
+        btnFileTrigger.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileSelect);
+
+        // Drag & Drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-indigo-500', 'bg-indigo-50/30');
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('border-indigo-500', 'bg-indigo-50/30');
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-indigo-500', 'bg-indigo-50/30');
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect();
+            }
+        });
+
+        // File handler logic
+        function handleFileSelect() {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            selectedImageMimeType = file.type;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const dataUrl = e.target.result;
+                imagePreview.src = dataUrl;
+                selectedImageBase64 = dataUrl.split(',')[1];
                 
-                terminalInfo.appendChild(lineDiv);
-                
-                for (let j = 0; j < currentLine.length; j++) {
-                    lineDiv.innerHTML += currentLine.charAt(j);
-                    await new Promise(r => setTimeout(r, 20)); 
+                // Show Preview screen, hide dropzone
+                previewCard.classList.remove('hidden');
+                dropZone.classList.add('hidden');
+                previewCard.scrollIntoView({ behavior: 'smooth' });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Camera modal activation
+        btnOpenCamera.addEventListener('click', async () => {
+            await startCamera(currentFacingMode);
+        });
+
+        // Start Live Camera feed
+        async function startCamera(facingMode) {
+            try {
+                // If there's any active stream running, stop it first
+                if (activeStream) {
+                    activeStream.getTracks().forEach(track => track.stop());
                 }
-                await new Promise(r => setTimeout(r, 150)); 
-                // Auto scroll down
-                document.querySelector('.terminal-container').scrollTop = document.querySelector('.terminal-container').scrollHeight;
+
+                const constraints = {
+                    video: {
+                        facingMode: { ideal: facingMode },
+                        width: { ideal: 1080 },
+                        height: { ideal: 1440 }
+                    },
+                    audio: false
+                };
+
+                activeStream = await navigator.mediaDevices.getUserMedia(constraints);
+                videoFeed.srcObject = activeStream;
+                cameraModal.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden'); // Disable body scroll while camera active
+            } catch (err) {
+                console.error("Camera access failed", err);
+                showToast("Camera access nahi mila! Standard file upload choose karein.");
             }
         }
 
-        function onResults(results) {
-            // Internal canvas size ko video resolution se match karna
-            canvasElement.width = videoElement.videoWidth;
-            canvasElement.height = videoElement.videoHeight;
-            canvasCtx.save();
-            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+        // Stop camera and close overlay
+        function stopCamera() {
+            if (activeStream) {
+                activeStream.getTracks().forEach(track => track.stop());
+                activeStream = null;
+            }
+            videoFeed.srcObject = null;
+            cameraModal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
 
-            if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-                const landmarks = results.multiFaceLandmarks[0];
+        // Switch Camera Front <-> Rear
+        btnSwitchCamera.addEventListener('click', () => {
+            currentFacingMode = (currentFacingMode === "user") ? "environment" : "user";
+            startCamera(currentFacingMode);
+        });
 
-                let minX = 1, minY = 1, maxX = 0, maxY = 0;
-                for (const landmark of landmarks) {
-                    if (landmark.x < minX) minX = landmark.x;
-                    if (landmark.x > maxX) maxX = landmark.x;
-                    if (landmark.y < minY) minY = landmark.y;
-                    if (landmark.y > maxY) maxY = landmark.y;
-                }
-                
-                const padding = 30; 
-                const x = minX * canvasElement.width - padding;
-                const y = minY * canvasElement.height - padding * 1.5;
-                const w = (maxX - minX) * canvasElement.width + padding * 2;
-                const h = (maxY - minY) * canvasElement.height + padding * 3;
+        // Close Camera Trigger
+        btnCloseCamera.addEventListener('click', stopCamera);
 
-                const mainColor = isLocked ? "#ff0000" : "#00ff00";
-                const meshColor = isLocked ? "rgba(255, 0, 0, 0.4)" : "rgba(0, 255, 0, 0.4)";
+        // Capture Shutter trigger
+        btnCaptureShutter.addEventListener('click', () => {
+            if (!activeStream) return;
 
-                drawConnectors(canvasCtx, landmarks, FACEMESH_TESSELATION, {color: meshColor, lineWidth: 1});
+            // Prepare canvas size based on real video aspect ratio
+            hiddenCanvas.width = videoFeed.videoWidth || 1080;
+            hiddenCanvas.height = videoFeed.videoHeight || 1440;
 
-                canvasCtx.strokeStyle = mainColor;
-                canvasCtx.lineWidth = 3;
-                const cornerLength = 30;
-                canvasCtx.beginPath();
-                canvasCtx.moveTo(x, y + cornerLength); canvasCtx.lineTo(x, y); canvasCtx.lineTo(x + cornerLength, y);
-                canvasCtx.moveTo(x + w - cornerLength, y); canvasCtx.lineTo(x + w, y); canvasCtx.lineTo(x + w, y + cornerLength);
-                canvasCtx.moveTo(x, y + h - cornerLength); canvasCtx.lineTo(x, y + h); canvasCtx.lineTo(x + cornerLength, y + h);
-                canvasCtx.moveTo(x + w - cornerLength, y + h); canvasCtx.lineTo(x + w, y + h); canvasCtx.lineTo(x + w, y + h - cornerLength);
-                canvasCtx.stroke();
+            const ctx = hiddenCanvas.getContext('2d');
+            // Draw current video frame to canvas
+            ctx.drawImage(videoFeed, 0, 0, hiddenCanvas.width, hiddenCanvas.height);
+            
+            // Get base64 payload
+            const capturedDataUrl = hiddenCanvas.toDataURL('image/jpeg', 0.85);
+            selectedImageBase64 = capturedDataUrl.split(',')[1];
+            selectedImageMimeType = "image/jpeg";
 
-                if (!isLocked && !scanTimer) {
-                    scanTimer = setTimeout(() => {
-                        isLocked = true;
-                        if (!typingStarted) {
-                            typingStarted = true;
-                            typeWriterEffect(targetDetails);
-                        }
-                    }, 2000); 
-                }
+            // Push to main preview element
+            imagePreview.src = capturedDataUrl;
+            previewCard.classList.remove('hidden');
+            dropZone.classList.add('hidden');
+
+            stopCamera();
+            previewCard.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Remove active image preview
+        btnRemoveImage.addEventListener('click', () => {
+            selectedImageBase64 = null;
+            fileInput.value = '';
+            imagePreview.src = '#';
+            previewCard.classList.add('hidden');
+            dropZone.classList.remove('hidden');
+            
+            resultCard.classList.add('hidden');
+            loaderState.classList.add('hidden');
+            resultPlaceholder.classList.remove('hidden');
+        });
+
+        // Validation - Mobile (10 digits check)
+        function validateMobileField() {
+            const value = fields.mobile.value;
+            const digitsOnly = value.replace(/\D/g, '');
+            
+            mobileBadge.innerText = `${digitsOnly.length} digits`;
+            
+            if (digitsOnly.length !== 10 && value.trim() !== "") {
+                errorMobile.classList.remove('hidden');
+                fields.mobile.classList.add('border-rose-500', 'focus:ring-rose-100');
+                fields.mobile.classList.remove('border-slate-200', 'focus:ring-indigo-100');
+                mobileBadge.classList.remove('bg-slate-100', 'text-slate-600', 'bg-emerald-50', 'text-emerald-700');
+                mobileBadge.classList.add('bg-rose-50', 'text-rose-700');
             } else {
-                if (!isLocked) {
-                    clearTimeout(scanTimer);
-                    scanTimer = null;
+                errorMobile.classList.add('hidden');
+                fields.mobile.classList.remove('border-rose-500', 'focus:ring-rose-100');
+                fields.mobile.classList.add('border-slate-200', 'focus:ring-indigo-100');
+                mobileBadge.classList.remove('bg-rose-50', 'text-rose-700');
+                if (digitsOnly.length === 10) {
+                    mobileBadge.classList.add('bg-emerald-50', 'text-emerald-700');
+                } else {
+                    mobileBadge.classList.add('bg-slate-100', 'text-slate-600');
                 }
             }
-            canvasCtx.restore();
         }
 
-        const faceMesh = new FaceMesh({locateFile: (file) => {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
-        }});
-        faceMesh.setOptions({
-            maxNumFaces: 1, 
-            refineLandmarks: true,
-            minDetectionConfidence: 0.5,
-            minTrackingConfidence: 0.5
-        });
-        faceMesh.onResults(onResults);
+        // Validation - Aadhaar (12 digits check)
+        function validateAadhaarField() {
+            const value = fields.aadhaar.value;
+            const digitsOnly = value.replace(/\D/g, '');
+            
+            aadhaarBadge.innerText = `${digitsOnly.length} digits`;
+            
+            if (digitsOnly.length !== 12 && value.trim() !== "") {
+                errorAadhaar.classList.remove('hidden');
+                fields.aadhaar.classList.add('border-rose-500', 'focus:ring-rose-100');
+                fields.aadhaar.classList.remove('border-slate-200', 'focus:ring-indigo-100');
+                aadhaarBadge.classList.remove('bg-slate-100', 'text-slate-600', 'bg-emerald-50', 'text-emerald-700');
+                aadhaarBadge.classList.add('bg-rose-50', 'text-rose-700');
+            } else {
+                errorAadhaar.classList.add('hidden');
+                fields.aadhaar.classList.remove('border-rose-500', 'focus:ring-rose-100');
+                fields.aadhaar.classList.add('border-slate-200', 'focus:ring-indigo-100');
+                aadhaarBadge.classList.remove('bg-rose-50', 'text-rose-700');
+                if (digitsOnly.length === 12) {
+                    aadhaarBadge.classList.add('bg-emerald-50', 'text-emerald-700');
+                } else {
+                    aadhaarBadge.classList.add('bg-slate-100', 'text-slate-600');
+                }
+            }
+        }
 
-        // facingMode: "environment" se direct back camera open hoga
-        const camera = new Camera(videoElement, {
-            onFrame: async () => {
-                await faceMesh.send({image: videoElement});
-            },
-            width: 1280,
-            height: 720,
-            facingMode: "environment" 
+        function runAllValidations() {
+            validateMobileField();
+            validateAadhaarField();
+        }
+
+        // Processing trigger
+        btnProcess.addEventListener('click', async () => {
+            if (!selectedImageBase64) return;
+
+            resultPlaceholder.classList.add('hidden');
+            resultCard.classList.add('hidden');
+            loaderState.classList.remove('hidden');
+            loaderStatus.innerText = "Fast Engine standard spelling and English format analyze kar rha hai...";
+
+            try {
+                const extractedData = await callGeminiAI(selectedImageBase64, selectedImageMimeType);
+                populateFields(extractedData);
+                
+                loaderState.classList.add('hidden');
+                resultCard.classList.remove('hidden');
+                resultCard.scrollIntoView({ behavior: 'smooth' });
+            } catch (err) {
+                console.error(err);
+                loaderState.classList.add('hidden');
+                resultPlaceholder.classList.remove('hidden');
+                showToast("Kuchh error aaya, koshish dobara karein!");
+            }
         });
-        camera.start();
+
+        // Fast optimized API execution
+        async function callGeminiAI(base64Image, mimeType) {
+            const model = "gemini-2.5-flash-preview-09-2025";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+            // Highly dense, compressed system instructions for faster API token utilization & response speed
+            const systemPrompt = `Extract handwritten details from the Marathi voter form directly to JSON.
+            1. Names (Father, Mother, Spouse): Standard English uppercase. Autocorrect spellings to correct standard Indian equivalent (e.g. 'Govsiya' to 'GOUSIYA BEGUM', 'Gousia' to 'GOUSIYA', 'Habi' to 'HABIB'). Transliterate Devanagari script to standard English.
+            2. Aadhaar & Mobile: Strip spaces/dots, keep pure numeric.
+            3. Date: Keep standard DD/MM/YYYY.
+            Return empty string if empty.`;
+
+            const userPrompt = `Extract as standard JSON structure:
+            - 'जन्म तारीख (DD/MM/YYYY)' -> dateOfBirth
+            - 'आधार क्रमांक (ऐच्छिक)' -> aadhaarNumber
+            - 'मोबाईल क्रमांक' -> mobileNumber
+            - 'वडिलांचे/पालकांचे नाव' -> fatherName
+            - 'वडिलांचा/पालकांचा मतदार ओळखपत्र क्रमांक' -> fatherVoterId
+            - 'आईचे नाव' -> motherName
+            - 'आईचा मतदार ओळखपत्र क्रमांक' -> motherVoterId
+            - 'पती किंवा पत्नीचे नाव' -> spouseName
+            - 'पती किंवा पत्नीचे मतदार ओळखपत्र क्रमांक' -> spouseVoterId`;
+
+            const payload = {
+                contents: [{
+                    parts: [
+                        { text: userPrompt },
+                        {
+                            inlineData: {
+                                mimeType: mimeType,
+                                data: base64Image
+                            }
+                        }
+                    ]
+                }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            dateOfBirth: { type: "STRING" },
+                            aadhaarNumber: { type: "STRING" },
+                            mobileNumber: { type: "STRING" },
+                            fatherName: { type: "STRING" },
+                            fatherVoterId: { type: "STRING" },
+                            motherName: { type: "STRING" },
+                            motherVoterId: { type: "STRING" },
+                            spouseName: { type: "STRING" },
+                            spouseVoterId: { type: "STRING" }
+                        }
+                    }
+                }
+            };
+
+            let retries = 5;
+            let delay = 1000;
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error(`HTTP error status ${response.status}`);
+                    const data = await response.json();
+                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    return JSON.parse(text);
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        // Fill up fields with validation trigger
+        function populateFields(data) {
+            fields.dob.value = data.dateOfBirth || "";
+            fields.aadhaar.value = data.aadhaarNumber || "";
+            fields.mobile.value = data.mobileNumber || "";
+            fields.father.value = (data.fatherName || "").toUpperCase();
+            fields.fatherVoter.value = data.fatherVoterId || "";
+            fields.mother.value = (data.motherName || "").toUpperCase();
+            fields.motherVoter.value = data.motherVoterId || "";
+            fields.spouse.value = (data.spouseName || "").toUpperCase();
+            fields.spouseVoter.value = data.spouseVoterId || "";
+
+            runAllValidations();
+        }
+
+        // Clipboard Copy Action for single fields (Safe for iframe)
+        window.copyFieldValue = function(fieldId) {
+            const inputElement = document.getElementById(fieldId);
+            if (!inputElement) return;
+
+            inputElement.select();
+            inputElement.setSelectionRange(0, 99999);
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast("Copied to clipboard!");
+                } else {
+                    showToast("Failed to copy.");
+                }
+            } catch (err) {
+                showToast("Error copying field.");
+            }
+        };
+
+        // Clipboard Copy All action
+        btnCopyAll.addEventListener('click', () => {
+            const blockText = `--- Form Details Extracted ---
+Date of Birth: ${fields.dob.value}
+Aadhaar Number: ${fields.aadhaar.value}
+Mobile Number: ${fields.mobile.value}
+Father's Name: ${fields.father.value}
+Father's Voter ID: ${fields.fatherVoter.value}
+Mother's Name: ${fields.mother.value}
+Mother's Voter ID: ${fields.motherVoter.value}
+Spouse Name: ${fields.spouse.value}
+Spouse Voter ID: ${fields.spouseVoter.value}
+------------------------------`;
+
+            const tempInput = document.createElement("textarea");
+            tempInput.value = blockText;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            
+            try {
+                document.execCommand("copy");
+                showToast("Saari details ek sath copy ho gayi!");
+            } catch (err) {
+                showToast("Error copying all details.");
+            }
+            document.body.removeChild(tempInput);
+        });
+
+        // Toast Messages helper
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.innerText = message;
+            
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
     </script>
 </body>
 </html>
+
+```
