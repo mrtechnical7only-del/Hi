@@ -1,776 +1,1597 @@
-```html
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart BLO Form Reader AI</title>
-    <!-- Tailwind CSS CDN -->
+    <title>My Cloud Storage</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for Premium Icons -->
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Inter', sans-serif;
+            background-color: #090d16;
+            color: #f8fafc;
+            overflow-x: hidden;
         }
-        /* Custom scrollbar styling for a cleaner look */
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #f1f5f9;
+            background: #0f172a;
         }
         ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
+            background: #334155;
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+            background: #475569;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .pulse-dot {
+            animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col selection:bg-blue-500 selection:text-white">
 
-    <!-- Header / Top Bar -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-md shadow-indigo-100 flex items-center justify-center">
-                    <i class="fa-solid fa-file-invoice text-xl animate-pulse"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold text-slate-900 tracking-tight">BLO Form Reader AI Pro</h1>
-                    <p class="text-xs text-slate-500">Live Camera, Auto-Correction aur High-Speed Extraction</p>
-                </div>
+    <!-- Custom Toast Notification -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform transition-all duration-300 translate-x-full opacity-0 pointer-events-none">
+        <div class="glass-card px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border-l-4 border-blue-500">
+            <i id="toast-icon" class="fas fa-info-circle text-blue-400"></i>
+            <span id="toast-msg" class="text-sm font-medium text-slate-200">Notification</span>
+        </div>
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="confirm-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-sm w-full rounded-2xl p-6 shadow-2xl border border-slate-700 transform transition-all">
+            <div class="w-12 h-12 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center mb-4 mx-auto">
+                <i class="fas fa-exclamation-triangle text-xl"></i>
             </div>
-            <div class="flex items-center space-x-3">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                    Ultra-Fast Mode Active
-                </span>
+            <h3 id="confirm-title" class="text-lg font-bold text-center text-white mb-2">Are you sure?</h3>
+            <p id="confirm-desc" class="text-sm text-slate-400 text-center mb-6">This action cannot be undone.</p>
+            <div class="flex gap-3">
+                <button id="confirm-cancel" class="flex-1 py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-sm transition">
+                    Cancel
+                </button>
+                <button id="confirm-ok" class="flex-1 py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-500 text-white font-medium text-sm transition shadow-lg shadow-red-600/20">
+                    Delete
+                </button>
             </div>
         </div>
-    </header>
+    </div>
 
-    <!-- Main Workspace -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col lg:flex-row gap-8">
-        
-        <!-- Left Side: Upload Zone & Preview -->
-        <div class="w-full lg:w-5/12 flex flex-col gap-6">
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-                <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
-                    <span class="bg-indigo-50 text-indigo-600 w-8 h-8 rounded-lg flex items-center justify-center mr-3">
-                        <i class="fa-solid fa-cloud-arrow-up"></i>
-                    </span>
-                    1. Form Capture Option
-                </h2>
-                
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <!-- Live Camera Button -->
-                    <button id="btn-open-camera" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center space-x-2 text-sm">
-                        <i class="fa-solid fa-camera"></i>
-                        <span>Live Camera</span>
-                    </button>
-                    <!-- File input proxy button -->
-                    <button id="btn-file-trigger" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center space-x-2 text-sm">
-                        <i class="fa-solid fa-images"></i>
-                        <span>Gallery/File</span>
-                    </button>
+    <!-- ================= 1. LOGIN VIEW ================= -->
+    <main id="login-view" class="flex-1 flex items-center justify-center p-4 relative overflow-hidden">
+        <!-- Decorative Background Glows -->
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full filter blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-600/10 rounded-full filter blur-3xl pointer-events-none"></div>
+
+        <div class="glass-card max-w-md w-full rounded-3xl p-8 md:p-10 shadow-2xl relative z-10 border border-slate-800/80">
+            <div class="flex flex-col items-center text-center mb-8">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/25 mb-5">
+                    <i class="fas fa-cloud text-3xl text-white"></i>
+                </div>
+                <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-white mb-2">My Cloud Storage</h1>
+                <p class="text-sm text-slate-400">Enter your password</p>
+            </div>
+
+            <form id="login-form" class="space-y-5">
+                <div>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        <input 
+                            type="password" 
+                            id="password-input" 
+                            placeholder="••••••••••••" 
+                            required
+                            autocomplete="off"
+                            class="w-full pl-11 pr-12 py-3.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-sm"
+                        >
+                        <button type="button" id="toggle-pwd" class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-slate-200">
+                            <i class="fas fa-eye" id="eye-icon"></i>
+                        </button>
+                    </div>
+                    <p id="login-error" class="text-xs text-red-400 mt-2 hidden flex items-center gap-1.5">
+                        <i class="fas fa-circle-exclamation"></i> Invalid password. Access denied.
+                    </p>
                 </div>
 
-                <!-- Hidden Input for File -->
-                <input type="file" id="file-input" accept="image/*" class="hidden" />
+                <button 
+                    type="submit" 
+                    id="login-btn"
+                    class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-sm shadow-lg shadow-blue-600/25 transition duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                    <span>Unlock Storage</span>
+                    <i class="fas fa-arrow-right text-xs"></i>
+                </button>
+            </form>
 
-                <!-- Drag and Drop Area as Fallback -->
-                <div id="drop-zone" class="border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-xl p-8 text-center cursor-pointer transition-all bg-slate-50 hover:bg-indigo-50/20 group relative">
-                    <div class="space-y-2">
-                        <p class="text-sm font-semibold text-slate-700">Ya fir file yahan drop karein</p>
-                        <p class="text-xs text-slate-400">Sabhi handwriting languages auto-supported hain</p>
+            <div class="mt-8 pt-6 border-t border-slate-800/80 flex items-center justify-center gap-2 text-xs text-slate-500">
+                <i class="fas fa-shield-halved text-blue-500/70"></i>
+                <span>End-to-End Encrypted Cloud Vault</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- ================= 2. NORMAL USER VIEW ================= -->
+    <div id="user-view" class="hidden flex-1 flex flex-col min-h-screen">
+        <!-- Top Navigation -->
+        <header class="glass-card sticky top-0 z-30 border-b border-slate-800/80 px-4 sm:px-8 py-4">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                        <i class="fas fa-cloud text-lg"></i>
                     </div>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-bold text-white leading-tight">My Cloud Storage</h2>
+                        <p class="text-xs text-slate-400">Personal Database Vault</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <button id="user-logout-btn" class="py-2 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-medium transition flex items-center gap-2 border border-slate-700">
+                        <i class="fas fa-sign-out-alt text-red-400"></i>
+                        <span>Lock Vault</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <div class="max-w-7xl w-full mx-auto flex-1 p-4 sm:p-8">
+            <!-- Breadcrumb Navigation -->
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
+                <nav class="flex items-center space-x-2 text-sm">
+                    <button id="user-back-root" class="text-slate-400 hover:text-white flex items-center gap-1.5 transition font-medium">
+                        <i class="fas fa-home text-blue-400"></i>
+                        <span>All Databases</span>
+                    </button>
+                    <span id="user-breadcrumb-sep" class="text-slate-600 hidden">/</span>
+                    <span id="user-current-folder-name" class="text-white font-semibold hidden"></span>
+                </nav>
+                <div id="user-item-count" class="text-xs text-slate-400 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
+                    Loading...
                 </div>
             </div>
 
-            <!-- Image Preview Box -->
-            <div id="preview-card" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 hidden">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-sm font-bold text-slate-900 flex items-center">
-                        <i class="fa-solid fa-eye text-indigo-600 mr-2"></i> Form Image Preview
-                    </h3>
-                    <button id="btn-remove-image" class="text-slate-400 hover:text-rose-500 text-xs flex items-center space-x-1">
-                        <i class="fa-solid fa-trash-can"></i>
-                        <span>Hataein</span>
+            <!-- Folders Grid (User) -->
+            <div id="user-folders-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                <!-- Populated dynamically via JS -->
+            </div>
+
+            <!-- Files Grid inside a Folder (User) -->
+            <div id="user-files-section" class="hidden">
+                <div class="mb-4">
+                    <button id="user-back-btn" class="inline-flex items-center gap-2 text-xs sm:text-sm text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 px-3.5 py-2 rounded-xl transition font-medium">
+                        <i class="fas fa-arrow-left"></i> Back to Folders
                     </button>
                 </div>
-                <div class="relative bg-slate-100 rounded-xl overflow-hidden border border-slate-200 flex items-center justify-center" style="min-h-64 max-h-96">
-                    <img id="image-preview" src="#" alt="Form Preview" class="object-contain max-h-96 w-full" />
+                <div id="user-files-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
+                    <!-- Populated dynamically via JS -->
                 </div>
-                
-                <!-- Action Button -->
-                <button id="btn-process" class="mt-5 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3.5 px-4 rounded-xl shadow-lg shadow-indigo-100 transition-all flex items-center justify-center space-x-2 text-base">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i>
-                    <span>AI se Details Extract Karein</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 3. IMAGE VIEWER LIGHTBOX (USER & ADMIN) ================= -->
+    <div id="image-lightbox" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex flex-col">
+        <!-- Lightbox Header -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800/80 bg-slate-950/60">
+            <div class="flex items-center gap-3 overflow-hidden">
+                <i class="fas fa-image text-blue-400 text-lg"></i>
+                <div class="truncate">
+                    <h4 id="lightbox-title" class="text-sm sm:text-base font-semibold text-white truncate">Image File</h4>
+                    <p id="lightbox-subtitle" class="text-xs text-slate-400 truncate">Folder Name</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="close-lightbox-btn" class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-red-600 text-white flex items-center justify-center transition shadow-lg">
+                    <i class="fas fa-times text-lg"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Right Side: Extracted Fields Dashboard -->
-        <div class="w-full lg:w-7/12 flex flex-col gap-6">
-            
-            <!-- Welcome State -->
-            <div id="result-placeholder" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-12 text-center flex-1 flex flex-col items-center justify-center">
-                <div class="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600 text-3xl mb-4">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i>
-                </div>
-                <h3 class="text-lg font-bold text-slate-800">Form Details Extraction Panel</h3>
-                <p class="text-sm text-slate-500 mt-2 max-w-md mx-auto">
-                    Camera se photo click karein ya upload karein. AI automatic saari hand-written details padh kar, spelling check karke English Capital Letters me convert kar dega.
-                </p>
-            </div>
+        <!-- Lightbox Body -->
+        <div class="flex-1 flex items-center justify-center p-4 sm:p-8 overflow-auto select-none" id="lightbox-backdrop">
+            <img id="lightbox-img" src="" alt="Preview" class="max-h-[80vh] max-w-full object-contain rounded-xl shadow-2xl border border-slate-800">
+        </div>
+    </div>
 
-            <!-- Loader State -->
-            <div id="loader-state" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-12 text-center flex-1 flex flex-col items-center justify-center hidden">
-                <div class="relative flex items-center justify-center mb-6">
-                    <div class="animate-spin rounded-full h-16 w-16 border-4 border-slate-100 border-t-indigo-600"></div>
-                    <i class="fa-solid fa-bolt absolute text-indigo-600 text-xl"></i>
-                </div>
-                <h3 class="text-lg font-bold text-slate-800 animate-pulse">High-Speed Processing...</h3>
-                <p id="loader-status" class="text-sm text-slate-500 mt-2">Form se handwriting analyze ki ja rahi hai...</p>
-            </div>
-
-            <!-- Results Panel (Active once details are loaded) -->
-            <div id="result-card" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 hidden flex flex-col h-full">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4 mb-6 gap-4">
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-900 flex items-center">
-                            <span class="bg-emerald-50 text-emerald-600 w-8 h-8 rounded-lg flex items-center justify-center mr-3">
-                                <i class="fa-solid fa-square-check"></i>
-                            </span>
-                            Extracted Form Data (English Capitals)
-                        </h3>
-                        <p class="text-xs text-slate-400 mt-0.5">BLO entry ke liye saare naam English CAPITAL letters aur standard correct spelling me hain</p>
+    <!-- ================= 4. ADMIN DASHBOARD VIEW ================= -->
+    <div id="admin-view" class="hidden flex-1 flex flex-col min-h-screen">
+        <!-- Admin Header -->
+        <header class="glass-card sticky top-0 z-30 border-b border-slate-800 px-4 sm:px-8 py-4">
+            <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
+                        <i class="fas fa-user-shield text-lg"></i>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <button id="btn-copy-all" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3.5 py-2 rounded-xl text-sm font-semibold flex items-center space-x-2 transition-all border border-indigo-100">
-                            <i class="fa-solid fa-copy"></i>
-                            <span>Copy All</span>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-base sm:text-lg font-bold text-white">Cloud Admin Control</h2>
+                            <span class="text-[10px] uppercase tracking-wider font-bold bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-md border border-indigo-500/30">Master</span>
+                            <span id="db-sync-badge" class="inline-flex items-center gap-1.5 text-[10px] font-semibold bg-emerald-500/15 text-emerald-300 px-2 py-0.5 rounded-md border border-emerald-500/30">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot"></span> Cloud DB Connected
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-400">Manage Folder Image URLs & Live User Watch Telemetry</p>
+                    </div>
+                </div>
+
+                <!-- Tab Switcher & Logout -->
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="bg-slate-900 p-1 rounded-xl border border-slate-800 flex items-center">
+                        <button id="tab-manage-btn" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition bg-blue-600 text-white shadow">
+                            <i class="fas fa-folder-tree mr-1.5"></i>Storage
+                        </button>
+                        <button id="tab-activity-btn" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-400 hover:text-white flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-green-500 pulse-dot"></span>
+                            <span>User Logs</span>
                         </button>
                     </div>
-                </div>
 
-                <!-- Form Fields List -->
-                <div class="space-y-5 flex-1 max-h-[550px] overflow-y-auto pr-2">
+                    <button id="admin-logout-btn" class="py-2 px-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-medium transition border border-slate-700">
+                        <i class="fas fa-sign-out-alt text-red-400 sm:mr-1"></i>
+                        <span class="hidden sm:inline">Logout</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Admin Main Content -->
+        <div class="max-w-7xl w-full mx-auto flex-1 p-4 sm:p-8">
+
+            <!-- TAB 1: STORAGE MANAGEMENT (CREATE/DELETE FOLDERS & IMAGES) -->
+            <div id="admin-storage-tab" class="space-y-8">
+                <!-- Forms Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     
-                    <!-- Date of Birth (जन्म तारीख) -->
-                    <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:border-indigo-100 transition-colors group">
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">जन्म तारीख (DD/MM/YYYY) / Date of Birth</label>
-                        <div class="mt-1.5 flex items-center space-x-2">
-                            <input type="text" id="field-dob" class="form-input w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl px-3 py-2.5 text-sm font-medium transition-all" value="" />
-                            <button onclick="copyFieldValue('field-dob')" class="bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center w-11 h-11 flex-shrink-0" title="Copy Text">
-                                <i class="fa-regular fa-copy"></i>
+                    <!-- Create Folder Card -->
+                    <div class="lg:col-span-5 glass-card rounded-2xl p-6 border border-slate-800">
+                        <div class="flex items-center gap-2.5 mb-4">
+                            <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
+                                <i class="fas fa-folder-plus"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-white">Create New Database Folder</h3>
+                        </div>
+                        <form id="create-folder-form" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-400 mb-1.5">Folder / Database Name</label>
+                                <input 
+                                    type="text" 
+                                    id="new-folder-name" 
+                                    placeholder="e.g., Instagram Database, Private Backup" 
+                                    required
+                                    class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                                >
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-400 mb-1.5">Folder Icon Theme</label>
+                                <select id="new-folder-icon" class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-blue-500">
+                                    <option value="folder">📁 Standard Database Folder</option>
+                                    <option value="whatsapp">💬 WhatsApp Theme (Green)</option>
+                                    <option value="telegram">✈️ Telegram Theme (Blue)</option>
+                                    <option value="secure">🔒 Confidential Vault (Amber)</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm transition shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2">
+                                <i class="fas fa-plus"></i> Create Database Folder
                             </button>
+                        </form>
+                    </div>
+
+                    <!-- Add Image File to Folder Card (URL System Only) -->
+                    <div class="lg:col-span-7 glass-card rounded-2xl p-6 border border-slate-800">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+                                    <i class="fas fa-link"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-base font-bold text-white">Save Image URL to Folder</h3>
+                                    <p class="text-[11px] text-slate-400">Directly stores folder & image URL in Cloud Database</p>
+                                </div>
+                            </div>
+                        </div>
+                        <form id="add-file-form" class="space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-400 mb-1.5">Select Target Folder</label>
+                                    <select id="target-folder-select" required class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500">
+                                        <option value="">Loading folders...</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-400 mb-1.5">Image Title / Filename</label>
+                                    <input 
+                                        type="text" 
+                                        id="new-file-name" 
+                                        placeholder="e.g., WhatsApp_Chat_Proof_01.jpg" 
+                                        required
+                                        class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Direct Image URL Input with Live Preview -->
+                            <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
+                                <div class="flex-1">
+                                    <label class="block text-xs font-medium text-slate-400 mb-1.5">Direct Image URL (Saved to Cloud DB)</label>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                                            <i class="fas fa-globe"></i>
+                                        </span>
+                                        <input 
+                                            type="url" 
+                                            id="new-file-url" 
+                                            required
+                                            placeholder="https://images.unsplash.com/photo-..." 
+                                            class="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                                        >
+                                    </div>
+                                </div>
+                                <div id="url-preview-box" class="hidden w-11 h-11 rounded-xl bg-slate-900 border border-slate-700 overflow-hidden shrink-0">
+                                    <img id="url-preview-img" src="" alt="Preview" class="w-full h-full object-cover">
+                                </div>
+                            </div>
+
+                            <button type="submit" id="add-file-btn" class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2">
+                                <i class="fas fa-cloud-arrow-up"></i> Save Image URL to Selected Folder
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Existing Folders & Files Explorer (Admin) -->
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fas fa-database text-blue-400"></i>
+                            <span>Active Cloud Folders & Files</span>
+                        </h3>
+                        <span id="admin-folder-summary" class="text-xs text-slate-400">0 Folders</span>
+                    </div>
+
+                    <div id="admin-folders-container" class="space-y-4">
+                        <!-- Dynamically rendered folders with their images and delete buttons -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: LIVE USER ACTIVITY & TELEMETRY -->
+            <div id="admin-activity-tab" class="hidden space-y-6">
+                <!-- Telemetry Summary Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="glass-card p-5 rounded-2xl border border-slate-800">
+                        <div class="flex items-center justify-between text-slate-400 text-xs mb-2">
+                            <span>TOTAL USER LOGINS</span>
+                            <i class="fas fa-right-to-bracket text-blue-400"></i>
+                        </div>
+                        <div id="stat-total-sessions" class="text-2xl font-bold text-white">0</div>
+                        <div id="stat-active-now" class="text-xs text-green-400 mt-1 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-green-500"></span> 0 Active right now
                         </div>
                     </div>
 
-                    <!-- Aadhaar Number (आधार क्रमांक) -->
-                    <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:border-indigo-100 transition-colors group">
-                        <div class="flex justify-between items-center">
-                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">आधार क्रमांक (ऐच्छिक) / Aadhaar Number</label>
-                            <span id="aadhaar-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">0 digits</span>
+                    <div class="glass-card p-5 rounded-2xl border border-slate-800">
+                        <div class="flex items-center justify-between text-slate-400 text-xs mb-2">
+                            <span>TOTAL PAGE STAY TIME</span>
+                            <i class="fas fa-clock text-amber-400"></i>
                         </div>
-                        <div class="mt-1.5 flex items-center space-x-2">
-                            <input type="text" id="field-aadhaar" class="form-input w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl px-3 py-2.5 text-sm font-medium transition-all" value="" placeholder="12-digit number" />
-                            <button onclick="copyFieldValue('field-aadhaar')" class="bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center w-11 h-11 flex-shrink-0" title="Copy Text">
-                                <i class="fa-regular fa-copy"></i>
-                            </button>
-                        </div>
-                        <p id="error-aadhaar" class="text-xs text-rose-500 mt-1.5 hidden font-semibold flex items-center">
-                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> Aadhaar number 12 digits ka hona chahiye!
-                        </p>
+                        <div id="stat-total-time" class="text-2xl font-bold text-white">0s</div>
+                        <div class="text-xs text-slate-400 mt-1">Cumulative user time on site</div>
                     </div>
 
-                    <!-- Mobile Number (मोबाईल क्रमांक) -->
-                    <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:border-indigo-100 transition-colors group">
-                        <div class="flex justify-between items-center">
-                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">मोबाईल क्रमांक / Mobile Number</label>
-                            <span id="mobile-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">0 digits</span>
+                    <div class="glass-card p-5 rounded-2xl border border-slate-800">
+                        <div class="flex items-center justify-between text-slate-400 text-xs mb-2">
+                            <span>FOLDERS OPENED</span>
+                            <i class="fas fa-folder-open text-indigo-400"></i>
                         </div>
-                        <div class="mt-1.5 flex items-center space-x-2">
-                            <input type="text" id="field-mobile" class="form-input w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl px-3 py-2.5 text-sm font-medium transition-all" value="" placeholder="10-digit number" />
-                            <button onclick="copyFieldValue('field-mobile')" class="bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center w-11 h-11 flex-shrink-0" title="Copy Text">
-                                <i class="fa-regular fa-copy"></i>
-                            </button>
-                        </div>
-                        <p id="error-mobile" class="text-xs text-rose-500 mt-1.5 hidden font-semibold flex items-center">
-                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> Mobile number strictly 10 digits ka hona chahiye!
-                        </p>
+                        <div id="stat-folders-opened" class="text-2xl font-bold text-white">0</div>
+                        <div class="text-xs text-slate-400 mt-1">Total folder clicks by users</div>
                     </div>
 
-                    <!-- Father's/Guardian's Name -->
-                    <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:border-indigo-100 transition-colors group">
-                        <div class="flex justify-between items-center">
-                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">वडिलांचे/पालकांचे नाव / Father's Name (English Capital)</label>
-                            <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 uppercase">Spelling Verified</span>
+                    <div class="glass-card p-5 rounded-2xl border border-slate-800">
+                        <div class="flex items-center justify-between text-slate-400 text-xs mb-2">
+                            <span>IMAGES WATCHED</span>
+                            <i class="fas fa-eye text-emerald-400"></i>
                         </div>
-                        <div class="mt-1.5 flex items-center space-x-2">
-                            <input type="text" id="field-father" class="form-input w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl px-3 py-2.5 text-sm font-semibold tracking-wide uppercase transition-all" value="" />
-                            <button onclick="copyFieldValue('field-father')" class="bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center w-11 h-11 flex-shrink-0" title="Copy Text">
-                                <i class="fa-regular fa-copy"></i>
-                            </button>
-                        </div>
+                        <div id="stat-files-watched" class="text-2xl font-bold text-white">0</div>
+                        <div id="stat-total-watch-time" class="text-xs text-emerald-400 mt-1">Total Watch Time: 0s</div>
                     </div>
+                </div>
 
-                    <!-- Father's Voter Card -->
-                    <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:border-indigo-100 transition-colors group">
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">वडिलांचा मतदार ओळखपत्र क्रमांक / Father's Voter Card No</label>
-                        <div class="mt-1.5 flex items-center space-x-2">
-                            <input type="text" id="field-father-voter" class="form-input w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl px-3 py-2.5 text-sm font-medium transition-all" value="" />
-                            <button onclick="copyFieldValue('field-father-voter')" class="bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center w-11 h-11 flex-shrink-0" title="Copy Text">
-                                <i class="fa-regular fa-copy"></i>
-                            </button>
-                        </div>
+                <!-- Header & Clear Logs -->
+                <div class="flex flex-wrap items-center justify-between gap-4 pt-2">
+                    <div>
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fas fa-satellite-dish text-green-400"></i>
+                            <span>Real-Time User Session & Watch Logs</span>
+                        </h3>
+                        <p class="text-xs text-slate-400">Tracks every login (`Doctor@786`), total stay duration, folders opened, and exact seconds each image was watched.</p>
                     </div>
+                    <button id="clear-logs-btn" class="py-2 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-semibold transition flex items-center gap-2">
+                        <i class="fas fa-trash-can"></i> Clear All Activity Logs
+                    </button>
+                </div>
 
-                    <!-- Mother's Name -->
-                    <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:border-indigo-100 transition-colors group">
-                        <div class="flex justify-between items-center">
-                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">आईचे नाव / Mother's Name (English Capital)</label>
-                            <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 uppercase">Spelling Verified</span>
-                        </div>
-                        <div class="mt-1.5 flex items-center space-x-2">
-                            <input type="text" id="field-mother" class="form-input w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl px-3 py-2.5 text-sm font-semibold tracking-wide uppercase transition-all" value="" />
-                            <button onclick="copyFieldValue('field-mother')" class="bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center w-11 h-11 flex-shrink-0" title="Copy Text">
-                                <i class="fa-regular fa-copy"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Mother's Voter Card -->
-                    <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:border-indigo-100 transition-colors group">
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">आईचा मतदार ओळखपत्र क्रमांक / Mother's Voter Card No</label>
-                        <div class="mt-1.5 flex items-center space-x-2">
-                            <input type="text" id="field-mother-voter" class="form-input w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl px-3 py-2.5 text-sm font-medium transition-all" value="" />
-                            <button onclick="copyFieldValue('field-mother-voter')" class="bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center w-11 h-11 flex-shrink-0" title="Copy Text">
-                                <i class="fa-regular fa-copy"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Spouse Name -->
-                    <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:border-indigo-100 transition-colors group">
-                        <div class="flex justify-between items-center">
-                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">पती किंवा पत्नीचे नाव / Spouse Name (English Capital)</label>
-                            <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 uppercase">Spelling Verified</span>
-                        </div>
-                        <div class="mt-1.5 flex items-center space-x-2">
-                            <input type="text" id="field-spouse" class="form-input w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl px-3 py-2.5 text-sm font-semibold tracking-wide uppercase transition-all" value="" />
-                            <button onclick="copyFieldValue('field-spouse')" class="bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center w-11 h-11 flex-shrink-0" title="Copy Text">
-                                <i class="fa-regular fa-copy"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Spouse Voter Card -->
-                    <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:border-indigo-100 transition-colors group">
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">पती किंवा पत्नीचे मतदार ओळखपत्र क्रमांक / Spouse Voter Card No</label>
-                        <div class="mt-1.5 flex items-center space-x-2">
-                            <input type="text" id="field-spouse-voter" class="form-input w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl px-3 py-2.5 text-sm font-medium transition-all" value="" />
-                            <button onclick="copyFieldValue('field-spouse-voter')" class="bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center w-11 h-11 flex-shrink-0" title="Copy Text">
-                                <i class="fa-regular fa-copy"></i>
-                            </button>
-                        </div>
-                    </div>
-
+                <!-- Sessions List -->
+                <div id="admin-sessions-list" class="space-y-4">
+                    <!-- Dynamically populated via Firestore onSnapshot -->
                 </div>
             </div>
 
         </div>
-    </main>
-
-    <!-- Fullscreen Camera Stream Overlay/Modal -->
-    <div id="camera-modal" class="fixed inset-0 bg-black/90 z-50 flex flex-col justify-between items-center hidden p-4">
-        <!-- Top Toolbar -->
-        <div class="w-full max-w-lg flex items-center justify-between text-white py-2">
-            <h3 class="text-sm font-bold flex items-center">
-                <i class="fa-solid fa-camera mr-2 animate-pulse text-indigo-500"></i> Place Form inside frame
-            </h3>
-            <button id="btn-close-camera" class="w-9 h-9 bg-slate-800 rounded-full flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-colors">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-        </div>
-
-        <!-- Video Stream Container -->
-        <div class="relative w-full max-w-lg aspect-[3/4] bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl flex items-center justify-center">
-            <video id="video-feed" class="w-full h-full object-cover" autoplay playsinline muted></video>
-            <!-- Highlight Overlay Grid Frame for alignment -->
-            <div class="absolute inset-6 border-2 border-dashed border-indigo-500/50 rounded-xl pointer-events-none flex items-center justify-center">
-                <div class="text-[10px] text-indigo-400 bg-slate-900/80 px-2 py-1 rounded">Align form within this box</div>
-            </div>
-        </div>
-
-        <!-- Bottom Actions -->
-        <div class="w-full max-w-lg py-6 flex items-center justify-around">
-            <!-- Toggle Front/Back Camera -->
-            <button id="btn-switch-camera" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 text-white rounded-full flex items-center justify-center transition-all shadow">
-                <i class="fa-solid fa-camera-rotate text-lg"></i>
-            </button>
-            <!-- Main Capture Trigger -->
-            <button id="btn-capture-shutter" class="w-20 h-20 bg-white hover:bg-indigo-50 rounded-full flex items-center justify-center transition-all shadow-lg active:scale-95 border-4 border-indigo-600">
-                <div class="w-14 h-14 bg-indigo-600 rounded-full flex items-center justify-center text-white">
-                    <i class="fa-solid fa-camera text-xl"></i>
-                </div>
-            </button>
-            <!-- Spacer for alignment -->
-            <div class="w-12 h-12"></div>
-        </div>
     </div>
 
-    <!-- Hidden Canvas to handle stream rendering -->
-    <canvas id="hidden-canvas" class="hidden"></canvas>
+    <!-- Firebase SDK & Application Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    <!-- Custom Toast Notification Box -->
-    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-xl flex items-center space-x-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50 pointer-events-none">
-        <div class="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xs">
-            <i class="fa-solid fa-check"></i>
-        </div>
-        <span id="toast-message" class="text-sm font-medium">Copied to clipboard!</span>
-    </div>
-
-    <!-- Script Block containing logical flow -->
-    <script>
-        // Global Variables
-        const apiKey = ""; // Set dynamically by environment
-        let selectedImageBase64 = null;
-        let selectedImageMimeType = "image/jpeg";
-        let activeStream = null;
-        let currentFacingMode = "environment"; // Default to back camera for forms
-
-        // DOM elements
-        const dropZone = document.getElementById('drop-zone');
-        const fileInput = document.getElementById('file-input');
-        const btnFileTrigger = document.getElementById('btn-file-trigger');
-        const previewCard = document.getElementById('preview-card');
-        const imagePreview = document.getElementById('image-preview');
-        const btnRemoveImage = document.getElementById('btn-remove-image');
-        const btnProcess = document.getElementById('btn-process');
-        
-        const resultPlaceholder = document.getElementById('result-placeholder');
-        const loaderState = document.getElementById('loader-state');
-        const loaderStatus = document.getElementById('loader-status');
-        const resultCard = document.getElementById('result-card');
-        const btnCopyAll = document.getElementById('btn-copy-all');
-
-        // Camera DOM elements
-        const btnOpenCamera = document.getElementById('btn-open-camera');
-        const cameraModal = document.getElementById('camera-modal');
-        const btnCloseCamera = document.getElementById('btn-close-camera');
-        const btnSwitchCamera = document.getElementById('btn-switch-camera');
-        const btnCaptureShutter = document.getElementById('btn-capture-shutter');
-        const videoFeed = document.getElementById('video-feed');
-        const hiddenCanvas = document.getElementById('hidden-canvas');
-
-        // Form Fields
-        const fields = {
-            dob: document.getElementById('field-dob'),
-            aadhaar: document.getElementById('field-aadhaar'),
-            mobile: document.getElementById('field-mobile'),
-            father: document.getElementById('field-father'),
-            fatherVoter: document.getElementById('field-father-voter'),
-            mother: document.getElementById('field-mother'),
-            motherVoter: document.getElementById('field-mother-voter'),
-            spouse: document.getElementById('field-spouse'),
-            spouseVoter: document.getElementById('field-spouse-voter')
+        // ============================================================================
+        // 1. INITIALIZE FIREBASE (CONNECTED TO storage-bf423) & GLOBAL STATE
+        // ============================================================================
+        const customFirebaseConfig = {
+            apiKey: "AIzaSyDD2JJZHIYXb9qxtnjDV3r2MzAEfdNoQ58",
+            authDomain: "storage-bf423.firebaseapp.com",
+            projectId: "storage-bf423",
+            storageBucket: "storage-bf423.firebasestorage.app",
+            messagingSenderId: "835516435840",
+            appId: "1:835516435840:web:af258abc3f9d1a68c64565"
         };
 
-        // Validation Elements
-        const errorAadhaar = document.getElementById('error-aadhaar');
-        const errorMobile = document.getElementById('error-mobile');
-        const aadhaarBadge = document.getElementById('aadhaar-badge');
-        const mobileBadge = document.getElementById('mobile-badge');
+        const appId = 'storage-bf423-vault';
+        const app = initializeApp(customFirebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
 
-        // Live input validation listeners
-        fields.mobile.addEventListener('input', validateMobileField);
-        fields.aadhaar.addEventListener('input', validateAadhaarField);
+        let currentUser = null;
+        let dbInitialized = false;
+        let currentRole = null; // 'user' | 'admin' | null
 
-        // Auto uppercase for name fields during manual typing
-        const nameFields = [fields.father, fields.mother, fields.spouse];
-        nameFields.forEach(field => {
-            field.addEventListener('input', function() {
-                this.value = this.value.toUpperCase();
-            });
-        });
+        // Collections Data Cache
+        let foldersData = [];
+        let filesData = [];
+        let sessionsData = [];
 
-        // Trigger input file selection
-        btnFileTrigger.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', handleFileSelect);
+        // User View State
+        let selectedUserFolderId = null;
 
-        // Drag & Drop
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('border-indigo-500', 'bg-indigo-50/30');
-        });
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('border-indigo-500', 'bg-indigo-50/30');
-        });
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('border-indigo-500', 'bg-indigo-50/30');
-            if (e.dataTransfer.files.length > 0) {
-                fileInput.files = e.dataTransfer.files;
-                handleFileSelect();
+        // Real-Time User Telemetry State
+        let activeSessionId = null;
+        let sessionStartTime = null;
+        let sessionHeartbeatTimer = null;
+        let sessionTotalSeconds = 0;
+        let sessionFoldersOpened = []; // Array of { folderId, folderName, openedAt }
+        let sessionFilesWatched = [];  // Array of { logId, fileId, fileName, folderName, openedAt, durationSeconds }
+
+        // Active Image Watch Tracking
+        let currentWatchingLogIndex = null;
+        let watchStartTime = null;
+        let watchIntervalTimer = null;
+
+        // ============================================================================
+        // 2. UI HELPERS (TOAST, CONFIRM MODAL, DURATION FORMATTER)
+        // ============================================================================
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toast-msg');
+            const iconEl = document.getElementById('toast-icon');
+
+            msgEl.textContent = message;
+            if (type === 'success') {
+                iconEl.className = 'fas fa-check-circle text-green-400';
+            } else if (type === 'error') {
+                iconEl.className = 'fas fa-exclamation-circle text-red-400';
+            } else {
+                iconEl.className = 'fas fa-info-circle text-blue-400';
             }
-        });
 
-        // File handler logic
-        function handleFileSelect() {
-            const file = fileInput.files[0];
-            if (!file) return;
+            toast.classList.remove('translate-x-full', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-x-full', 'opacity-0');
+            }, 3200);
+        }
 
-            selectedImageMimeType = file.type;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const dataUrl = e.target.result;
-                imagePreview.src = dataUrl;
-                selectedImageBase64 = dataUrl.split(',')[1];
-                
-                // Show Preview screen, hide dropzone
-                previewCard.classList.remove('hidden');
-                dropZone.classList.add('hidden');
-                previewCard.scrollIntoView({ behavior: 'smooth' });
+        function showConfirmModal(title, desc, onConfirm) {
+            const modal = document.getElementById('confirm-modal');
+            document.getElementById('confirm-title').textContent = title;
+            document.getElementById('confirm-desc').textContent = desc;
+            modal.classList.remove('hidden');
+
+            const cancelBtn = document.getElementById('confirm-cancel');
+            const okBtn = document.getElementById('confirm-ok');
+
+            const cleanup = () => {
+                modal.classList.add('hidden');
+                cancelBtn.onclick = null;
+                okBtn.onclick = null;
             };
-            reader.readAsDataURL(file);
+
+            cancelBtn.onclick = cleanup;
+            okBtn.onclick = () => {
+                cleanup();
+                onConfirm();
+            };
         }
 
-        // Camera modal activation
-        btnOpenCamera.addEventListener('click', async () => {
-            await startCamera(currentFacingMode);
-        });
+        function formatDuration(seconds) {
+            if (!seconds || seconds < 0) return '0s';
+            const hrs = Math.floor(seconds / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            const secs = Math.floor(seconds % 60);
+            const parts = [];
+            if (hrs > 0) parts.push(`${hrs}h`);
+            if (mins > 0) parts.push(`${mins}m`);
+            parts.push(`${secs}s`);
+            return parts.join(' ');
+        }
 
-        // Start Live Camera feed
-        async function startCamera(facingMode) {
+        function formatTimestamp(ms) {
+            if (!ms) return 'N/A';
+            const date = new Date(ms);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' • ' + date.toLocaleDateString();
+        }
+
+        // ============================================================================
+        // 3. AUTHENTICATION & DEFAULT SEED DATA (WHATSAPP & TELEGRAM DATABASES)
+        // ============================================================================
+        async function startDatabaseEngine(userObj) {
+            if (dbInitialized) return;
+            dbInitialized = true;
+            currentUser = userObj;
+
+            // Update Admin Badge with Project ID
+            const syncBadge = document.getElementById('db-sync-badge');
+            if (syncBadge) {
+                syncBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot"></span> Connected: storage-bf423`;
+            }
+
+            // Ensure default folders ("WhatsApp Database" & "Telegram Database") exist
+            await seedDefaultDatabasesIfNeeded();
+
+            // Setup real-time listeners for folders, files, and user activity logs
+            setupRealtimeListeners();
+        }
+
+        async function initAuthAndListeners() {
             try {
-                // If there's any active stream running, stop it first
-                if (activeStream) {
-                    activeStream.getTracks().forEach(track => track.stop());
-                }
-
-                const constraints = {
-                    video: {
-                        facingMode: { ideal: facingMode },
-                        width: { ideal: 1080 },
-                        height: { ideal: 1440 }
-                    },
-                    audio: false
-                };
-
-                activeStream = await navigator.mediaDevices.getUserMedia(constraints);
-                videoFeed.srcObject = activeStream;
-                cameraModal.classList.remove('hidden');
-                document.body.classList.add('overflow-hidden'); // Disable body scroll while camera active
+                await signInAnonymously(auth);
             } catch (err) {
-                console.error("Camera access failed", err);
-                showToast("Camera access nahi mila! Standard file upload choose karein.");
+                console.warn("Anonymous Auth not enabled in Firebase Console, connecting directly to Firestore:", err.message);
+                // Fallback user object so Firestore works even if Anonymous Auth is disabled in user's Firebase console
+                await startDatabaseEngine({ uid: 'client_' + Math.random().toString(36).substring(2, 10) });
             }
         }
 
-        // Stop camera and close overlay
-        function stopCamera() {
-            if (activeStream) {
-                activeStream.getTracks().forEach(track => track.stop());
-                activeStream = null;
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                await startDatabaseEngine(user);
             }
-            videoFeed.srcObject = null;
-            cameraModal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }
-
-        // Switch Camera Front <-> Rear
-        btnSwitchCamera.addEventListener('click', () => {
-            currentFacingMode = (currentFacingMode === "user") ? "environment" : "user";
-            startCamera(currentFacingMode);
         });
 
-        // Close Camera Trigger
-        btnCloseCamera.addEventListener('click', stopCamera);
-
-        // Capture Shutter trigger
-        btnCaptureShutter.addEventListener('click', () => {
-            if (!activeStream) return;
-
-            // Prepare canvas size based on real video aspect ratio
-            hiddenCanvas.width = videoFeed.videoWidth || 1080;
-            hiddenCanvas.height = videoFeed.videoHeight || 1440;
-
-            const ctx = hiddenCanvas.getContext('2d');
-            // Draw current video frame to canvas
-            ctx.drawImage(videoFeed, 0, 0, hiddenCanvas.width, hiddenCanvas.height);
-            
-            // Get base64 payload
-            const capturedDataUrl = hiddenCanvas.toDataURL('image/jpeg', 0.85);
-            selectedImageBase64 = capturedDataUrl.split(',')[1];
-            selectedImageMimeType = "image/jpeg";
-
-            // Push to main preview element
-            imagePreview.src = capturedDataUrl;
-            previewCard.classList.remove('hidden');
-            dropZone.classList.add('hidden');
-
-            stopCamera();
-            previewCard.scrollIntoView({ behavior: 'smooth' });
-        });
-
-        // Remove active image preview
-        btnRemoveImage.addEventListener('click', () => {
-            selectedImageBase64 = null;
-            fileInput.value = '';
-            imagePreview.src = '#';
-            previewCard.classList.add('hidden');
-            dropZone.classList.remove('hidden');
-            
-            resultCard.classList.add('hidden');
-            loaderState.classList.add('hidden');
-            resultPlaceholder.classList.remove('hidden');
-        });
-
-        // Validation - Mobile (10 digits check)
-        function validateMobileField() {
-            const value = fields.mobile.value;
-            const digitsOnly = value.replace(/\D/g, '');
-            
-            mobileBadge.innerText = `${digitsOnly.length} digits`;
-            
-            if (digitsOnly.length !== 10 && value.trim() !== "") {
-                errorMobile.classList.remove('hidden');
-                fields.mobile.classList.add('border-rose-500', 'focus:ring-rose-100');
-                fields.mobile.classList.remove('border-slate-200', 'focus:ring-indigo-100');
-                mobileBadge.classList.remove('bg-slate-100', 'text-slate-600', 'bg-emerald-50', 'text-emerald-700');
-                mobileBadge.classList.add('bg-rose-50', 'text-rose-700');
-            } else {
-                errorMobile.classList.add('hidden');
-                fields.mobile.classList.remove('border-rose-500', 'focus:ring-rose-100');
-                fields.mobile.classList.add('border-slate-200', 'focus:ring-indigo-100');
-                mobileBadge.classList.remove('bg-rose-50', 'text-rose-700');
-                if (digitsOnly.length === 10) {
-                    mobileBadge.classList.add('bg-emerald-50', 'text-emerald-700');
-                } else {
-                    mobileBadge.classList.add('bg-slate-100', 'text-slate-600');
-                }
-            }
-        }
-
-        // Validation - Aadhaar (12 digits check)
-        function validateAadhaarField() {
-            const value = fields.aadhaar.value;
-            const digitsOnly = value.replace(/\D/g, '');
-            
-            aadhaarBadge.innerText = `${digitsOnly.length} digits`;
-            
-            if (digitsOnly.length !== 12 && value.trim() !== "") {
-                errorAadhaar.classList.remove('hidden');
-                fields.aadhaar.classList.add('border-rose-500', 'focus:ring-rose-100');
-                fields.aadhaar.classList.remove('border-slate-200', 'focus:ring-indigo-100');
-                aadhaarBadge.classList.remove('bg-slate-100', 'text-slate-600', 'bg-emerald-50', 'text-emerald-700');
-                aadhaarBadge.classList.add('bg-rose-50', 'text-rose-700');
-            } else {
-                errorAadhaar.classList.add('hidden');
-                fields.aadhaar.classList.remove('border-rose-500', 'focus:ring-rose-100');
-                fields.aadhaar.classList.add('border-slate-200', 'focus:ring-indigo-100');
-                aadhaarBadge.classList.remove('bg-rose-50', 'text-rose-700');
-                if (digitsOnly.length === 12) {
-                    aadhaarBadge.classList.add('bg-emerald-50', 'text-emerald-700');
-                } else {
-                    aadhaarBadge.classList.add('bg-slate-100', 'text-slate-600');
-                }
-            }
-        }
-
-        function runAllValidations() {
-            validateMobileField();
-            validateAadhaarField();
-        }
-
-        // Processing trigger
-        btnProcess.addEventListener('click', async () => {
-            if (!selectedImageBase64) return;
-
-            resultPlaceholder.classList.add('hidden');
-            resultCard.classList.add('hidden');
-            loaderState.classList.remove('hidden');
-            loaderStatus.innerText = "Fast Engine standard spelling and English format analyze kar rha hai...";
-
+        async function seedDefaultDatabasesIfNeeded() {
+            if (!currentUser) return;
             try {
-                const extractedData = await callGeminiAI(selectedImageBase64, selectedImageMimeType);
-                populateFields(extractedData);
-                
-                loaderState.classList.add('hidden');
-                resultCard.classList.remove('hidden');
-                resultCard.scrollIntoView({ behavior: 'smooth' });
-            } catch (err) {
-                console.error(err);
-                loaderState.classList.add('hidden');
-                resultPlaceholder.classList.remove('hidden');
-                showToast("Kuchh error aaya, koshish dobara karein!");
-            }
-        });
+                const initDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'app_config', 'seed_status');
+                const initSnap = await getDoc(initDocRef);
 
-        // Fast optimized API execution
-        async function callGeminiAI(base64Image, mimeType) {
-            const model = "gemini-2.5-flash-preview-09-2025";
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+                if (!initSnap.exists()) {
+                    // Create Default Folder 1: WhatsApp Database
+                    const waFolderId = 'folder_whatsapp_default';
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'folders', waFolderId), {
+                        name: 'WhatsApp Database',
+                        iconType: 'whatsapp',
+                        createdAt: Date.now()
+                    });
 
-            // Highly dense, compressed system instructions for faster API token utilization & response speed
-            const systemPrompt = `Extract handwritten details from the Marathi voter form directly to JSON.
-            1. Names (Father, Mother, Spouse): Standard English uppercase. Autocorrect spellings to correct standard Indian equivalent (e.g. 'Govsiya' to 'GOUSIYA BEGUM', 'Gousia' to 'GOUSIYA', 'Habi' to 'HABIB'). Transliterate Devanagari script to standard English.
-            2. Aadhaar & Mobile: Strip spaces/dots, keep pure numeric.
-            3. Date: Keep standard DD/MM/YYYY.
-            Return empty string if empty.`;
+                    // Create Default Folder 2: Telegram Database
+                    const tgFolderId = 'folder_telegram_default';
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'folders', tgFolderId), {
+                        name: 'Telegram Database',
+                        iconType: 'telegram',
+                        createdAt: Date.now() + 10
+                    });
 
-            const userPrompt = `Extract as standard JSON structure:
-            - 'जन्म तारीख (DD/MM/YYYY)' -> dateOfBirth
-            - 'आधार क्रमांक (ऐच्छिक)' -> aadhaarNumber
-            - 'मोबाईल क्रमांक' -> mobileNumber
-            - 'वडिलांचे/पालकांचे नाव' -> fatherName
-            - 'वडिलांचा/पालकांचा मतदार ओळखपत्र क्रमांक' -> fatherVoterId
-            - 'आईचे नाव' -> motherName
-            - 'आईचा मतदार ओळखपत्र क्रमांक' -> motherVoterId
-            - 'पती किंवा पत्नीचे नाव' -> spouseName
-            - 'पती किंवा पत्नीचे मतदार ओळखपत्र क्रमांक' -> spouseVoterId`;
-
-            const payload = {
-                contents: [{
-                    parts: [
-                        { text: userPrompt },
+                    // Seed sample images inside WhatsApp Database
+                    const sampleFiles = [
                         {
-                            inlineData: {
-                                mimeType: mimeType,
-                                data: base64Image
+                            folderId: waFolderId,
+                            name: 'WA_Chat_Backup_Log_01.jpg',
+                            url: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=900&q=80',
+                            createdAt: Date.now()
+                        },
+                        {
+                            folderId: waFolderId,
+                            name: 'WA_Media_Document_Scan.jpg',
+                            url: 'https://images.unsplash.com/photo-1555421689-491a97ff2040?auto=format&fit=crop&w=900&q=80',
+                            createdAt: Date.now() + 5
+                        },
+                        {
+                            folderId: tgFolderId,
+                            name: 'TG_Cloud_Encrypted_Node.jpg',
+                            url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=900&q=80',
+                            createdAt: Date.now() + 10
+                        },
+                        {
+                            folderId: tgFolderId,
+                            name: 'TG_Channel_Media_Archive.jpg',
+                            url: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=900&q=80',
+                            createdAt: Date.now() + 15
+                        }
+                    ];
+
+                    for (const file of sampleFiles) {
+                        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'files'), file);
+                    }
+
+                    // Mark seeded so if Admin deletes them later, they stay deleted
+                    await setDoc(initDocRef, { initialized: true, timestamp: Date.now() });
+                }
+            } catch (err) {
+                console.error("Error seeding default databases:", err);
+            }
+        }
+
+        // ============================================================================
+        // 4. REAL-TIME FIRESTORE LISTENERS (RULE 1 & RULE 2 COMPLIANT)
+        // ============================================================================
+        function setupRealtimeListeners() {
+            if (!currentUser) return;
+
+            const foldersCol = collection(db, 'artifacts', appId, 'public', 'data', 'folders');
+            const filesCol = collection(db, 'artifacts', appId, 'public', 'data', 'files');
+            const sessionsCol = collection(db, 'artifacts', appId, 'public', 'data', 'user_sessions');
+
+            // Listen to Folders
+            onSnapshot(foldersCol, (snapshot) => {
+                foldersData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                foldersData.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+                renderUserView();
+                renderAdminStorageView();
+            }, (err) => console.error("Folders listener error:", err));
+
+            // Listen to Files
+            onSnapshot(filesCol, (snapshot) => {
+                filesData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                filesData.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                renderUserView();
+                renderAdminStorageView();
+            }, (err) => console.error("Files listener error:", err));
+
+            // Listen to User Telemetry Sessions
+            onSnapshot(sessionsCol, (snapshot) => {
+                sessionsData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                sessionsData.sort((a, b) => (b.loginTime || 0) - (a.loginTime || 0));
+                renderAdminActivityLogs();
+            }, (err) => console.error("Sessions listener error:", err));
+        }
+
+        // ============================================================================
+        // 5. NORMAL USER TELEMETRY TRACKING ENGINE
+        // ============================================================================
+        async function startUserTelemetrySession() {
+            if (!currentUser) return;
+
+            activeSessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+            sessionStartTime = Date.now();
+            sessionTotalSeconds = 0;
+            sessionFoldersOpened = [];
+            sessionFilesWatched = [];
+
+            const sessionRef = doc(db, 'artifacts', appId, 'public', 'data', 'user_sessions', activeSessionId);
+            try {
+                await setDoc(sessionRef, {
+                    sessionId: activeSessionId,
+                    userUid: currentUser.uid,
+                    passwordUsed: 'Doctor@786',
+                    loginTime: sessionStartTime,
+                    lastActiveTime: Date.now(),
+                    totalDurationSeconds: 0,
+                    status: 'Online (Browsing Vault)',
+                    currentLocation: 'Main Folders Dashboard',
+                    foldersOpenedJson: JSON.stringify([]),
+                    filesWatchedJson: JSON.stringify([])
+                });
+            } catch (e) {
+                console.error("Failed to create session log:", e);
+            }
+
+            // Heartbeat every 2 seconds to update live page stay duration & active file watch timer
+            if (sessionHeartbeatTimer) clearInterval(sessionHeartbeatTimer);
+            sessionHeartbeatTimer = setInterval(() => {
+                syncUserTelemetryToFirestore();
+            }, 2000);
+        }
+
+        async function syncUserTelemetryToFirestore(customStatus = null, customLocation = null) {
+            if (!currentUser || !activeSessionId || currentRole !== 'user') return;
+
+            sessionTotalSeconds = Math.max(1, Math.round((Date.now() - sessionStartTime) / 1000));
+
+            // If user currently has an image open, update its live watch time
+            if (currentWatchingLogIndex !== null && watchStartTime !== null) {
+                const elapsedWatchSecs = Math.max(1, Math.round((Date.now() - watchStartTime) / 1000));
+                if (sessionFilesWatched[currentWatchingLogIndex]) {
+                    sessionFilesWatched[currentWatchingLogIndex].durationSeconds = elapsedWatchSecs;
+                }
+            }
+
+            const sessionRef = doc(db, 'artifacts', appId, 'public', 'data', 'user_sessions', activeSessionId);
+            const payload = {
+                lastActiveTime: Date.now(),
+                totalDurationSeconds: sessionTotalSeconds,
+                foldersOpenedJson: JSON.stringify(sessionFoldersOpened),
+                filesWatchedJson: JSON.stringify(sessionFilesWatched)
+            };
+
+            if (customStatus) payload.status = customStatus;
+            if (customLocation) payload.currentLocation = customLocation;
+
+            try {
+                await updateDoc(sessionRef, payload);
+            } catch (e) {
+                console.error("Telemetry sync error:", e);
+            }
+        }
+
+        async function recordFolderOpen(folder) {
+            if (currentRole !== 'user' || !activeSessionId) return;
+            sessionFoldersOpened.push({
+                folderId: folder.id,
+                folderName: folder.name,
+                openedAt: Date.now()
+            });
+            await syncUserTelemetryToFirestore('Viewing Folder', `Folder: ${folder.name}`);
+        }
+
+        async function startRecordingImageWatch(file, folderName) {
+            if (currentRole !== 'user' || !activeSessionId) return;
+
+            watchStartTime = Date.now();
+            const newLogEntry = {
+                logId: 'watch_' + Date.now(),
+                fileId: file.id,
+                fileName: file.name,
+                fileUrl: file.url,
+                folderName: folderName,
+                openedAt: watchStartTime,
+                durationSeconds: 1
+            };
+
+            sessionFilesWatched.push(newLogEntry);
+            currentWatchingLogIndex = sessionFilesWatched.length - 1;
+
+            await syncUserTelemetryToFirestore('Watching Image File', `Image: ${file.name} (${folderName})`);
+        }
+
+        async function stopRecordingImageWatch() {
+            if (currentRole !== 'user' || !activeSessionId) return;
+
+            if (currentWatchingLogIndex !== null && watchStartTime !== null) {
+                const finalWatchSecs = Math.max(1, Math.round((Date.now() - watchStartTime) / 1000));
+                if (sessionFilesWatched[currentWatchingLogIndex]) {
+                    sessionFilesWatched[currentWatchingLogIndex].durationSeconds = finalWatchSecs;
+                }
+            }
+            currentWatchingLogIndex = null;
+            watchStartTime = null;
+
+            const currentFolder = foldersData.find(f => f.id === selectedUserFolderId);
+            const loc = currentFolder ? `Folder: ${currentFolder.name}` : 'Main Folders Dashboard';
+            await syncUserTelemetryToFirestore('Online (Browsing Vault)', loc);
+        }
+
+        async function endUserTelemetrySession() {
+            if (sessionHeartbeatTimer) {
+                clearInterval(sessionHeartbeatTimer);
+                sessionHeartbeatTimer = null;
+            }
+            if (currentWatchingLogIndex !== null) {
+                await stopRecordingImageWatch();
+            }
+            if (activeSessionId && currentUser) {
+                sessionTotalSeconds = Math.max(1, Math.round((Date.now() - sessionStartTime) / 1000));
+                const sessionRef = doc(db, 'artifacts', appId, 'public', 'data', 'user_sessions', activeSessionId);
+                try {
+                    await updateDoc(sessionRef, {
+                        lastActiveTime: Date.now(),
+                        totalDurationSeconds: sessionTotalSeconds,
+                        status: 'Logged Out',
+                        currentLocation: 'Disconnected',
+                        foldersOpenedJson: JSON.stringify(sessionFoldersOpened),
+                        filesWatchedJson: JSON.stringify(sessionFilesWatched)
+                    });
+                } catch (e) {
+                    console.error("Error ending session:", e);
+                }
+            }
+            activeSessionId = null;
+        }
+
+        // Handle browser tab close
+        window.addEventListener('beforeunload', () => {
+            if (currentRole === 'user' && activeSessionId) {
+                endUserTelemetrySession();
+            }
+        });
+
+        // ============================================================================
+        // 6. RENDER USER VIEW (CLEAN FOLDERS & FILES)
+        // ============================================================================
+        function getFolderTheme(iconType, folderName = '') {
+            const lower = folderName.toLowerCase();
+            if (iconType === 'whatsapp' || lower.includes('whatsapp')) {
+                return {
+                    icon: 'fab fa-whatsapp',
+                    bg: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400',
+                    badge: 'bg-emerald-500/20 text-emerald-300'
+                };
+            }
+            if (iconType === 'telegram' || lower.includes('telegram')) {
+                return {
+                    icon: 'fab fa-telegram-plane',
+                    bg: 'bg-sky-500/10 border-sky-500/30 text-sky-400',
+                    badge: 'bg-sky-500/20 text-sky-300'
+                };
+            }
+            if (iconType === 'secure') {
+                return {
+                    icon: 'fas fa-user-lock',
+                    bg: 'bg-amber-500/10 border-amber-500/30 text-amber-400',
+                    badge: 'bg-amber-500/20 text-amber-300'
+                };
+            }
+            return {
+                icon: 'fas fa-folder',
+                bg: 'bg-blue-500/10 border-blue-500/30 text-blue-400',
+                badge: 'bg-blue-500/20 text-blue-300'
+            };
+        }
+
+        function renderUserView() {
+            if (currentRole !== 'user') return;
+
+            const foldersGrid = document.getElementById('user-folders-grid');
+            const filesSection = document.getElementById('user-files-section');
+            const filesGrid = document.getElementById('user-files-grid');
+            const breadcrumbSep = document.getElementById('user-breadcrumb-sep');
+            const breadcrumbFolder = document.getElementById('user-current-folder-name');
+            const itemCountEl = document.getElementById('user-item-count');
+
+            // Check if selected folder still exists
+            if (selectedUserFolderId && !foldersData.some(f => f.id === selectedUserFolderId)) {
+                selectedUserFolderId = null;
+            }
+
+            if (!selectedUserFolderId) {
+                // Show Root Folders Grid
+                foldersGrid.classList.remove('hidden');
+                filesSection.classList.add('hidden');
+                breadcrumbSep.classList.add('hidden');
+                breadcrumbFolder.classList.add('hidden');
+                itemCountEl.textContent = `${foldersData.length} Database${foldersData.length === 1 ? '' : 's'}`;
+
+                if (foldersData.length === 0) {
+                    foldersGrid.innerHTML = `
+                        <div class="col-span-full glass-card rounded-2xl p-12 text-center border border-slate-800">
+                            <i class="fas fa-folder-open text-4xl text-slate-600 mb-3"></i>
+                            <p class="text-slate-300 font-semibold">No Database Folders Available</p>
+                            <p class="text-xs text-slate-500 mt-1">Cloud storage is currently empty.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                foldersGrid.innerHTML = foldersData.map(folder => {
+                    const theme = getFolderTheme(folder.iconType, folder.name);
+                    const count = filesData.filter(f => f.folderId === folder.id).length;
+                    return `
+                        <div data-folder-id="${folder.id}" class="user-folder-card glass-card rounded-2xl p-5 border border-slate-800/90 hover:border-blue-500/50 cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/5 group">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="w-12 h-12 rounded-2xl border ${theme.bg} flex items-center justify-center text-2xl group-hover:scale-110 transition">
+                                    <i class="${theme.icon}"></i>
+                                </div>
+                                <span class="text-xs font-medium px-2.5 py-1 rounded-lg ${theme.badge}">
+                                    ${count} ${count === 1 ? 'File' : 'Files'}
+                                </span>
+                            </div>
+                            <h3 class="text-base font-bold text-white group-hover:text-blue-400 transition truncate">${folder.name}</h3>
+                            <p class="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
+                                <i class="fas fa-shield-check text-slate-500"></i> Tap to open database
+                            </p>
+                        </div>
+                    `;
+                }).join('');
+
+                // Attach click handlers to folders
+                document.querySelectorAll('.user-folder-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const fId = card.getAttribute('data-folder-id');
+                        const folderObj = foldersData.find(f => f.id === fId);
+                        if (folderObj) {
+                            selectedUserFolderId = fId;
+                            recordFolderOpen(folderObj);
+                            renderUserView();
+                        }
+                    });
+                });
+
+            } else {
+                // Show Files Inside Selected Folder
+                const currentFolder = foldersData.find(f => f.id === selectedUserFolderId);
+                const folderFiles = filesData.filter(f => f.folderId === selectedUserFolderId);
+
+                foldersGrid.classList.add('hidden');
+                filesSection.classList.remove('hidden');
+                breadcrumbSep.classList.remove('hidden');
+                breadcrumbFolder.classList.remove('hidden');
+                breadcrumbFolder.textContent = currentFolder ? currentFolder.name : '';
+                itemCountEl.textContent = `${folderFiles.length} Image${folderFiles.length === 1 ? '' : 's'}`;
+
+                if (folderFiles.length === 0) {
+                    filesGrid.innerHTML = `
+                        <div class="col-span-full glass-card rounded-2xl p-12 text-center border border-slate-800">
+                            <i class="fas fa-images text-4xl text-slate-600 mb-3"></i>
+                            <p class="text-slate-300 font-semibold">This folder is empty</p>
+                            <p class="text-xs text-slate-500 mt-1">No image files have been uploaded to ${currentFolder.name} yet.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                filesGrid.innerHTML = folderFiles.map(file => `
+                    <div data-file-id="${file.id}" class="user-file-card glass-card rounded-2xl overflow-hidden border border-slate-800 hover:border-blue-500/50 cursor-pointer transition-all duration-200 hover:-translate-y-1 group flex flex-col">
+                        <div class="aspect-square w-full bg-slate-900 overflow-hidden relative">
+                            <img 
+                                src="${file.url}" 
+                                alt="${file.name}" 
+                                onerror="this.src='https://placehold.co/600x600/1e293b/94a3b8?text=Image+File'"
+                                class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                            >
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition flex items-end p-3">
+                                <span class="text-xs text-white font-medium flex items-center gap-1.5">
+                                    <i class="fas fa-expand"></i> View Image
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-3.5">
+                            <h4 class="text-xs sm:text-sm font-semibold text-slate-200 truncate group-hover:text-blue-400 transition">${file.name}</h4>
+                            <p class="text-[11px] text-slate-500 mt-0.5">Cloud Image File</p>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Attach click handlers to open image lightbox & start watch duration timer
+                document.querySelectorAll('.user-file-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const fileId = card.getAttribute('data-file-id');
+                        const fileObj = filesData.find(f => f.id === fileId);
+                        if (fileObj && currentFolder) {
+                            openImageLightbox(fileObj, currentFolder.name);
+                        }
+                    });
+                });
+            }
+        }
+
+        // ============================================================================
+        // 7. IMAGE LIGHTBOX CONTROLLER
+        // ============================================================================
+        function openImageLightbox(fileObj, folderName) {
+            const lightbox = document.getElementById('image-lightbox');
+            const imgEl = document.getElementById('lightbox-img');
+            const titleEl = document.getElementById('lightbox-title');
+            const subEl = document.getElementById('lightbox-subtitle');
+
+            imgEl.src = fileObj.url;
+            imgEl.onerror = function() {
+                this.src = 'https://placehold.co/800x600/1e293b/94a3b8?text=Invalid+Image+URL';
+            };
+            titleEl.textContent = fileObj.name;
+            subEl.textContent = `Folder: ${folderName}`;
+
+            lightbox.classList.remove('hidden');
+
+            // Silently record watch duration in background for Normal User (No UI timer shown to user)
+            if (currentRole === 'user') {
+                startRecordingImageWatch(fileObj, folderName);
+            }
+        }
+
+        function closeImageLightbox() {
+            const lightbox = document.getElementById('image-lightbox');
+            lightbox.classList.add('hidden');
+            document.getElementById('lightbox-img').src = '';
+
+            if (currentRole === 'user') {
+                stopRecordingImageWatch();
+            }
+        }
+
+        document.getElementById('close-lightbox-btn').addEventListener('click', closeImageLightbox);
+        document.getElementById('lightbox-backdrop').addEventListener('click', (e) => {
+            if (e.target.id === 'lightbox-backdrop') {
+                closeImageLightbox();
+            }
+        });
+
+        // ============================================================================
+        // 8. RENDER ADMIN STORAGE MANAGEMENT VIEW
+        // ============================================================================
+        function renderAdminStorageView() {
+            if (currentRole !== 'admin') return;
+
+            const selectEl = document.getElementById('target-folder-select');
+            const containerEl = document.getElementById('admin-folders-container');
+            const summaryEl = document.getElementById('admin-folder-summary');
+
+            summaryEl.textContent = `${foldersData.length} Folder${foldersData.length === 1 ? '' : 's'} • ${filesData.length} Total Image${filesData.length === 1 ? '' : 's'}`;
+
+            // Populate Folder Dropdown for Image Upload
+            const previousVal = selectEl.value;
+            if (foldersData.length === 0) {
+                selectEl.innerHTML = `<option value="">No folders available - Create one first</option>`;
+            } else {
+                selectEl.innerHTML = foldersData.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+                if (previousVal && foldersData.some(f => f.id === previousVal)) {
+                    selectEl.value = previousVal;
+                }
+            }
+
+            // Render Folders & Their Images
+            if (foldersData.length === 0) {
+                containerEl.innerHTML = `
+                    <div class="glass-card rounded-2xl p-10 text-center border border-slate-800">
+                        <i class="fas fa-folder-plus text-3xl text-slate-600 mb-2"></i>
+                        <p class="text-slate-300 font-semibold">No Folders Created Yet</p>
+                        <p class="text-xs text-slate-500 mt-1">Use the form above to create a new database folder.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            containerEl.innerHTML = foldersData.map(folder => {
+                const theme = getFolderTheme(folder.iconType, folder.name);
+                const folderFiles = filesData.filter(f => f.folderId === folder.id);
+
+                return `
+                    <div class="glass-card rounded-2xl p-5 border border-slate-800">
+                        <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl border ${theme.bg} flex items-center justify-center text-lg">
+                                    <i class="${theme.icon}"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-bold text-white">${folder.name}</h4>
+                                    <p class="text-xs text-slate-400">${folderFiles.length} Image File${folderFiles.length === 1 ? '' : 's'} inside</p>
+                                </div>
+                            </div>
+                            <button data-del-folder="${folder.id}" data-del-name="${folder.name}" class="admin-del-folder-btn py-2 px-3.5 rounded-xl bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/20 text-xs font-semibold transition flex items-center gap-1.5">
+                                <i class="fas fa-trash"></i> Delete Folder
+                            </button>
+                        </div>
+
+                        ${folderFiles.length === 0 ? `
+                            <p class="text-xs text-slate-500 pt-4 italic">No images in this folder yet. Add images using the form above.</p>
+                        ` : `
+                            <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 pt-4">
+                                ${folderFiles.map(file => `
+                                    <div class="bg-slate-900/90 border border-slate-800 rounded-xl overflow-hidden group relative flex flex-col">
+                                        <div class="aspect-square w-full bg-slate-950 overflow-hidden relative">
+                                            <img 
+                                                src="${file.url}" 
+                                                alt="${file.name}"
+                                                onerror="this.src='https://placehold.co/400x400/1e293b/94a3b8?text=Image'"
+                                                class="w-full h-full object-cover cursor-pointer admin-preview-img"
+                                                data-file-id="${file.id}"
+                                                data-folder-name="${folder.name}"
+                                            >
+                                            <button 
+                                                data-del-file="${file.id}" 
+                                                data-del-filename="${file.name}"
+                                                class="admin-del-file-btn absolute top-2 right-2 w-7 h-7 rounded-lg bg-red-600/90 hover:bg-red-500 text-white flex items-center justify-center text-xs shadow-lg"
+                                                title="Delete Image"
+                                            >
+                                                <i class="fas fa-trash-can"></i>
+                                            </button>
+                                        </div>
+                                        <div class="p-2">
+                                            <p class="text-[11px] font-semibold text-slate-200 truncate" title="${file.name}">${file.name}</p>
+                                            <p class="text-[10px] text-blue-400/80 truncate mt-0.5" title="${file.url}">
+                                                <i class="fas fa-link mr-1"></i>${file.url}
+                                            </p>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `}
+                    </div>
+                `;
+            }).join('');
+
+            // Bind Delete Folder Buttons
+            document.querySelectorAll('.admin-del-folder-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const folderId = btn.getAttribute('data-del-folder');
+                    const folderName = btn.getAttribute('data-del-name');
+                    showConfirmModal(
+                        `Delete "${folderName}"?`,
+                        `This will permanently delete the folder and all image files stored inside it.`,
+                        async () => {
+                            try {
+                                // Delete folder doc
+                                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'folders', folderId));
+                                // Delete associated files
+                                const associatedFiles = filesData.filter(f => f.folderId === folderId);
+                                for (const f of associatedFiles) {
+                                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'files', f.id));
+                                }
+                                showToast(`Folder "${folderName}" deleted`, 'success');
+                            } catch (e) {
+                                showToast('Error deleting folder', 'error');
                             }
                         }
-                    ]
-                }],
-                systemInstruction: {
-                    parts: [{ text: systemPrompt }]
-                },
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            dateOfBirth: { type: "STRING" },
-                            aadhaarNumber: { type: "STRING" },
-                            mobileNumber: { type: "STRING" },
-                            fatherName: { type: "STRING" },
-                            fatherVoterId: { type: "STRING" },
-                            motherName: { type: "STRING" },
-                            motherVoterId: { type: "STRING" },
-                            spouseName: { type: "STRING" },
-                            spouseVoterId: { type: "STRING" }
+                    );
+                });
+            });
+
+            // Bind Delete File Buttons
+            document.querySelectorAll('.admin-del-file-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const fileId = btn.getAttribute('data-del-file');
+                    const fileName = btn.getAttribute('data-del-filename');
+                    showConfirmModal(
+                        `Delete Image?`,
+                        `Remove "${fileName}" from this folder?`,
+                        async () => {
+                            try {
+                                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'files', fileId));
+                                showToast(`Image "${fileName}" removed`, 'success');
+                            } catch (err) {
+                                showToast('Failed to delete image', 'error');
+                            }
                         }
-                    }
-                }
-            };
+                    );
+                });
+            });
 
-            let retries = 5;
-            let delay = 1000;
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(url, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload)
-                    });
-                    if (!response.ok) throw new Error(`HTTP error status ${response.status}`);
-                    const data = await response.json();
-                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                    return JSON.parse(text);
-                } catch (error) {
-                    if (i === retries - 1) throw error;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 2;
-                }
-            }
+            // Bind Admin Image Preview
+            document.querySelectorAll('.admin-preview-img').forEach(img => {
+                img.addEventListener('click', () => {
+                    const fileId = img.getAttribute('data-file-id');
+                    const folderName = img.getAttribute('data-folder-name');
+                    const fileObj = filesData.find(f => f.id === fileId);
+                    if (fileObj) openImageLightbox(fileObj, folderName);
+                });
+            });
         }
 
-        // Fill up fields with validation trigger
-        function populateFields(data) {
-            fields.dob.value = data.dateOfBirth || "";
-            fields.aadhaar.value = data.aadhaarNumber || "";
-            fields.mobile.value = data.mobileNumber || "";
-            fields.father.value = (data.fatherName || "").toUpperCase();
-            fields.fatherVoter.value = data.fatherVoterId || "";
-            fields.mother.value = (data.motherName || "").toUpperCase();
-            fields.motherVoter.value = data.motherVoterId || "";
-            fields.spouse.value = (data.spouseName || "").toUpperCase();
-            fields.spouseVoter.value = data.spouseVoterId || "";
+        // ============================================================================
+        // 9. RENDER ADMIN USER TELEMETRY & WATCH TIME LOGS
+        // ============================================================================
+        function renderAdminActivityLogs() {
+            if (currentRole !== 'admin') return;
 
-            runAllValidations();
+            const listEl = document.getElementById('admin-sessions-list');
+            const totalSessionsEl = document.getElementById('stat-total-sessions');
+            const activeNowEl = document.getElementById('stat-active-now');
+            const totalTimeEl = document.getElementById('stat-total-time');
+            const foldersOpenedEl = document.getElementById('stat-folders-opened');
+            const filesWatchedEl = document.getElementById('stat-files-watched');
+            const totalWatchTimeEl = document.getElementById('stat-total-watch-time');
+
+            let cumulativePageSeconds = 0;
+            let totalFolderClicks = 0;
+            let totalImageClicks = 0;
+            let cumulativeWatchSeconds = 0;
+            let currentlyOnlineCount = 0;
+
+            const now = Date.now();
+
+            const parsedSessions = sessionsData.map(s => {
+                let foldersArr = [];
+                let filesArr = [];
+                try { foldersArr = JSON.parse(s.foldersOpenedJson || '[]'); } catch (e) {}
+                try { filesArr = JSON.parse(s.filesWatchedJson || '[]'); } catch (e) {}
+
+                const isRecent = (now - (s.lastActiveTime || 0)) < 12000 && s.status !== 'Logged Out';
+                if (isRecent) currentlyOnlineCount++;
+
+                cumulativePageSeconds += (s.totalDurationSeconds || 0);
+                totalFolderClicks += foldersArr.length;
+                totalImageClicks += filesArr.length;
+                filesArr.forEach(fw => {
+                    cumulativeWatchSeconds += (fw.durationSeconds || 0);
+                });
+
+                return {
+                    ...s,
+                    isOnline: isRecent,
+                    foldersArr,
+                    filesArr
+                };
+            });
+
+            // Update Summary Metrics
+            totalSessionsEl.textContent = parsedSessions.length;
+            activeNowEl.innerHTML = `<span class="w-2 h-2 rounded-full ${currentlyOnlineCount > 0 ? 'bg-green-500 pulse-dot' : 'bg-slate-600'}"></span> ${currentlyOnlineCount} Active right now`;
+            totalTimeEl.textContent = formatDuration(cumulativePageSeconds);
+            foldersOpenedEl.textContent = totalFolderClicks;
+            filesWatchedEl.textContent = totalImageClicks;
+            totalWatchTimeEl.textContent = `Total Watch Time: ${formatDuration(cumulativeWatchSeconds)}`;
+
+            if (parsedSessions.length === 0) {
+                listEl.innerHTML = `
+                    <div class="glass-card rounded-2xl p-12 text-center border border-slate-800">
+                        <i class="fas fa-user-clock text-4xl text-slate-600 mb-3"></i>
+                        <p class="text-slate-300 font-semibold">No User Activity Recorded Yet</p>
+                        <p class="text-xs text-slate-500 mt-1">When a user logs in with password <code class="text-blue-400">Doctor@786</code>, their live session, folder clicks, and image watch timers will appear here automatically.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = parsedSessions.map((session, idx) => `
+                <div class="glass-card rounded-2xl p-6 border ${session.isOnline ? 'border-green-500/40' : 'border-slate-800'} transition">
+                    <!-- Session Top Bar -->
+                    <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-800">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl ${session.isOnline ? 'bg-green-500/10 text-green-400 border border-green-500/30' : 'bg-slate-800 text-slate-400'} flex items-center justify-center font-bold text-sm">
+                                #${parsedSessions.length - idx}
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2.5">
+                                    <span class="text-sm sm:text-base font-bold text-white">Normal User Session</span>
+                                    ${session.isOnline ? `
+                                        <span class="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-green-500/20 text-green-300 px-2.5 py-0.5 rounded-full border border-green-500/30">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-green-400 pulse-dot"></span> LIVE NOW
+                                        </span>
+                                    ` : `
+                                        <span class="text-[11px] font-medium bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full">
+                                            Offline / Ended
+                                        </span>
+                                    `}
+                                </div>
+                                <p class="text-xs text-slate-400 mt-0.5">
+                                    Password Used: <span class="text-emerald-400 font-mono font-semibold">${session.passwordUsed || 'Doctor@786'}</span> • 
+                                    Login Time: <span class="text-slate-300">${formatTimestamp(session.loginTime)}</span> • 
+                                    Status: <span class="text-blue-400 font-medium">${session.currentLocation || session.status}</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Total Page Stay Timer Badge -->
+                        <div class="flex items-center gap-3 bg-slate-900/90 px-4 py-2.5 rounded-xl border border-slate-800">
+                            <i class="fas fa-stopwatch text-amber-400 text-lg"></i>
+                            <div>
+                                <div class="text-[10px] uppercase tracking-wider text-slate-400">Total Time on Page</div>
+                                <div class="text-base font-bold text-white">${formatDuration(session.totalDurationSeconds)}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Session Details Grid: Folders Opened & Images Watched -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-4">
+                        
+                        <!-- Folders Opened Column -->
+                        <div class="lg:col-span-5">
+                            <h5 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
+                                <i class="fas fa-folder-open text-indigo-400"></i>
+                                <span>Folders Opened (${session.foldersArr.length})</span>
+                            </h5>
+                            ${session.foldersArr.length === 0 ? `
+                                <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-3.5 text-xs text-slate-500 italic">
+                                    User has not opened any folders in this session.
+                                </div>
+                            ` : `
+                                <div class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                                    ${session.foldersArr.map((fLog, i) => `
+                                        <div class="bg-slate-900/80 border border-slate-800/90 rounded-xl px-3.5 py-2.5 flex items-center justify-between text-xs">
+                                            <div class="flex items-center gap-2 truncate">
+                                                <span class="text-slate-500 font-mono">${i + 1}.</span>
+                                                <i class="fas fa-folder text-blue-400"></i>
+                                                <span class="text-slate-200 font-medium truncate">${fLog.folderName}</span>
+                                            </div>
+                                            <span class="text-[11px] text-slate-400 shrink-0 ml-2">${new Date(fLog.openedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `}
+                        </div>
+
+                        <!-- Files Clicked & Watch Duration Column -->
+                        <div class="lg:col-span-7">
+                            <h5 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
+                                <i class="fas fa-eye text-emerald-400"></i>
+                                <span>Image Files Clicked & Watch Duration (${session.filesArr.length})</span>
+                            </h5>
+                            ${session.filesArr.length === 0 ? `
+                                <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-3.5 text-xs text-slate-500 italic">
+                                    User has not clicked any image files in this session.
+                                </div>
+                            ` : `
+                                <div class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                                    ${session.filesArr.map((imgLog) => `
+                                        <div class="bg-slate-900/80 border border-slate-800/90 rounded-xl p-2.5 flex items-center justify-between gap-3 text-xs">
+                                            <div class="flex items-center gap-3 min-w-0">
+                                                <img 
+                                                    src="${imgLog.fileUrl || ''}" 
+                                                    onerror="this.src='https://placehold.co/100x100/1e293b/94a3b8?text=IMG'"
+                                                    class="w-10 h-10 rounded-lg object-cover bg-slate-950 border border-slate-700 shrink-0"
+                                                >
+                                                <div class="min-w-0">
+                                                    <div class="text-slate-200 font-semibold truncate">${imgLog.fileName}</div>
+                                                    <div class="text-[11px] text-slate-400 truncate">
+                                                        Folder: <span class="text-indigo-300">${imgLog.folderName}</span> • 
+                                                        Opened: ${new Date(imgLog.openedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}
+                                                    </div>
+                                                    <div class="text-[10px] text-blue-400/80 truncate max-w-xs" title="${imgLog.fileUrl || ''}">
+                                                        URL: ${imgLog.fileUrl || 'N/A'}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="shrink-0 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5">
+                                                <i class="fas fa-clock text-[11px]"></i>
+                                                <span>Watched: ${formatDuration(imgLog.durationSeconds)}</span>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `}
+                        </div>
+
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // Clipboard Copy Action for single fields (Safe for iframe)
-        window.copyFieldValue = function(fieldId) {
-            const inputElement = document.getElementById(fieldId);
-            if (!inputElement) return;
-
-            inputElement.select();
-            inputElement.setSelectionRange(0, 99999);
-            
-            try {
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    showToast("Copied to clipboard!");
-                } else {
-                    showToast("Failed to copy.");
-                }
-            } catch (err) {
-                showToast("Error copying field.");
+        // ============================================================================
+        // 10. EVENT LISTENERS (LOGIN, FORMS, TABS, URL PREVIEW)
+        // ============================================================================
+        
+        // Toggle Password Visibility on Login Page
+        document.getElementById('toggle-pwd').addEventListener('click', () => {
+            const pwdInput = document.getElementById('password-input');
+            const eyeIcon = document.getElementById('eye-icon');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                eyeIcon.className = 'fas fa-eye-slash';
+            } else {
+                pwdInput.type = 'password';
+                eyeIcon.className = 'fas fa-eye';
             }
-        };
-
-        // Clipboard Copy All action
-        btnCopyAll.addEventListener('click', () => {
-            const blockText = `--- Form Details Extracted ---
-Date of Birth: ${fields.dob.value}
-Aadhaar Number: ${fields.aadhaar.value}
-Mobile Number: ${fields.mobile.value}
-Father's Name: ${fields.father.value}
-Father's Voter ID: ${fields.fatherVoter.value}
-Mother's Name: ${fields.mother.value}
-Mother's Voter ID: ${fields.motherVoter.value}
-Spouse Name: ${fields.spouse.value}
-Spouse Voter ID: ${fields.spouseVoter.value}
-------------------------------`;
-
-            const tempInput = document.createElement("textarea");
-            tempInput.value = blockText;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            
-            try {
-                document.execCommand("copy");
-                showToast("Saari details ek sath copy ho gayi!");
-            } catch (err) {
-                showToast("Error copying all details.");
-            }
-            document.body.removeChild(tempInput);
         });
 
-        // Toast Messages helper
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toast-message');
-            toastMsg.innerText = message;
-            
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            toast.classList.add('translate-y-0', 'opacity-100');
+        // Login Form Handler (Doctor@786 -> User, Doctor@7777 -> Admin)
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const pwdInput = document.getElementById('password-input');
+            const errEl = document.getElementById('login-error');
+            const enteredPwd = pwdInput.value.trim();
 
-            setTimeout(() => {
-                toast.classList.remove('translate-y-0', 'opacity-100');
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
+            errEl.classList.add('hidden');
+
+            if (enteredPwd === 'Doctor@786') {
+                // Normal User Login
+                currentRole = 'user';
+                selectedUserFolderId = null;
+                pwdInput.value = '';
+                document.getElementById('login-view').classList.add('hidden');
+                document.getElementById('admin-view').classList.add('hidden');
+                document.getElementById('user-view').classList.remove('hidden');
+
+                renderUserView();
+                await startUserTelemetrySession();
+                showToast('Welcome to My Cloud Storage', 'success');
+
+            } else if (enteredPwd === 'Doctor@7777') {
+                // Admin Login
+                currentRole = 'admin';
+                pwdInput.value = '';
+                document.getElementById('login-view').classList.add('hidden');
+                document.getElementById('user-view').classList.add('hidden');
+                document.getElementById('admin-view').classList.remove('hidden');
+
+                renderAdminStorageView();
+                renderAdminActivityLogs();
+                showToast('Admin Dashboard Unlocked', 'success');
+
+            } else {
+                errEl.classList.remove('hidden');
+                pwdInput.select();
+            }
+        });
+
+        // User Navigation Back to Root Folders
+        document.getElementById('user-back-root').addEventListener('click', () => {
+            selectedUserFolderId = null;
+            syncUserTelemetryToFirestore('Online (Browsing Vault)', 'Main Folders Dashboard');
+            renderUserView();
+        });
+        document.getElementById('user-back-btn').addEventListener('click', () => {
+            selectedUserFolderId = null;
+            syncUserTelemetryToFirestore('Online (Browsing Vault)', 'Main Folders Dashboard');
+            renderUserView();
+        });
+
+        // User Logout
+        document.getElementById('user-logout-btn').addEventListener('click', async () => {
+            await endUserTelemetrySession();
+            currentRole = null;
+            selectedUserFolderId = null;
+            document.getElementById('user-view').classList.add('hidden');
+            document.getElementById('login-view').classList.remove('hidden');
+            showToast('Vault locked safely', 'info');
+        });
+
+        // Admin Logout
+        document.getElementById('admin-logout-btn').addEventListener('click', () => {
+            currentRole = null;
+            document.getElementById('admin-view').classList.add('hidden');
+            document.getElementById('login-view').classList.remove('hidden');
+            showToast('Logged out of Admin Panel', 'info');
+        });
+
+        // Admin Tabs Switcher
+        const tabManageBtn = document.getElementById('tab-manage-btn');
+        const tabActivityBtn = document.getElementById('tab-activity-btn');
+        const storageTab = document.getElementById('admin-storage-tab');
+        const activityTab = document.getElementById('admin-activity-tab');
+
+        tabManageBtn.addEventListener('click', () => {
+            storageTab.classList.remove('hidden');
+            activityTab.classList.add('hidden');
+            tabManageBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition bg-blue-600 text-white shadow';
+            tabActivityBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-400 hover:text-white flex items-center gap-1.5';
+        });
+
+        tabActivityBtn.addEventListener('click', () => {
+            storageTab.classList.add('hidden');
+            activityTab.classList.remove('hidden');
+            tabActivityBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition bg-blue-600 text-white shadow flex items-center gap-1.5';
+            tabManageBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-400 hover:text-white';
+            renderAdminActivityLogs();
+        });
+
+        // Admin: Create New Folder
+        document.getElementById('create-folder-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const nameInput = document.getElementById('new-folder-name');
+            const iconSelect = document.getElementById('new-folder-icon');
+            const folderName = nameInput.value.trim();
+
+            if (!folderName) return;
+
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'folders'), {
+                    name: folderName,
+                    iconType: iconSelect.value,
+                    createdAt: Date.now()
+                });
+                nameInput.value = '';
+                showToast(`Folder "${folderName}" created!`, 'success');
+            } catch (err) {
+                console.error("Create folder error:", err);
+                showToast('Failed to create folder', 'error');
+            }
+        });
+
+        // Live URL Thumbnail Preview in Admin Form
+        const urlInputEl = document.getElementById('new-file-url');
+        const previewBoxEl = document.getElementById('url-preview-box');
+        const previewImgEl = document.getElementById('url-preview-img');
+
+        urlInputEl.addEventListener('input', () => {
+            const val = urlInputEl.value.trim();
+            if (val.startsWith('http://') || val.startsWith('https://')) {
+                previewImgEl.src = val;
+                previewBoxEl.classList.remove('hidden');
+                previewImgEl.onerror = () => previewBoxEl.classList.add('hidden');
+            } else {
+                previewBoxEl.classList.add('hidden');
+            }
+        });
+
+        // Admin: Save Direct Image URL to Folder in Cloud Database
+        document.getElementById('add-file-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const folderSelect = document.getElementById('target-folder-select');
+            const folderId = folderSelect.value;
+            const folderObj = foldersData.find(f => f.id === folderId);
+            const fileNameInput = document.getElementById('new-file-name');
+            const fileUrlInput = document.getElementById('new-file-url');
+            const submitBtn = document.getElementById('add-file-btn');
+
+            if (!folderId) {
+                showToast('Please select or create a folder first', 'error');
+                return;
+            }
+
+            const fileName = fileNameInput.value.trim();
+            const finalImageUrl = fileUrlInput.value.trim();
+
+            if (!finalImageUrl) {
+                showToast('Please enter a valid Direct Image URL', 'error');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Saving URL to Database...`;
+
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'files'), {
+                    folderId: folderId,
+                    folderName: folderObj ? folderObj.name : '',
+                    name: fileName,
+                    url: finalImageUrl,
+                    createdAt: Date.now()
+                });
+
+                fileNameInput.value = '';
+                fileUrlInput.value = '';
+                previewBoxEl.classList.add('hidden');
+                showToast(`Image URL "${fileName}" saved in cloud database!`, 'success');
+            } catch (err) {
+                console.error("Add file URL error:", err);
+                showToast('Error saving image URL to database', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fas fa-cloud-arrow-up"></i> Save Image URL to Selected Folder`;
+            }
+        });
+
+        // Admin: Clear All Activity Logs
+        document.getElementById('clear-logs-btn').addEventListener('click', () => {
+            if (sessionsData.length === 0) {
+                showToast('No logs to clear', 'info');
+                return;
+            }
+            showConfirmModal(
+                'Clear All User Activity Logs?',
+                'This will permanently remove all recorded user sessions and watch timers.',
+                async () => {
+                    try {
+                        for (const s of sessionsData) {
+                            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'user_sessions', s.id));
+                        }
+                        showToast('All user activity logs cleared', 'success');
+                    } catch (e) {
+                        showToast('Failed to clear logs', 'error');
+                    }
+                }
+            );
+        });
+
+        // Start Firebase Auth on load
+        initAuthAndListeners();
     </script>
 </body>
 </html>
-
 ```
