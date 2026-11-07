@@ -159,32 +159,29 @@
         <!-- Main Workspace -->
         <div class="max-w-7xl w-full mx-auto flex-1 p-4 sm:p-8">
             <!-- Breadcrumb Navigation -->
-            <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
-                <nav class="flex items-center space-x-2 text-sm">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-800">
+                <nav id="user-breadcrumb-nav" class="flex flex-wrap items-center gap-2 text-sm">
                     <button id="user-back-root" class="text-slate-400 hover:text-white flex items-center gap-1.5 transition font-medium">
                         <i class="fas fa-home text-blue-400"></i>
                         <span>All Databases</span>
                     </button>
-                    <span id="user-breadcrumb-sep" class="text-slate-600 hidden">/</span>
-                    <span id="user-current-folder-name" class="text-white font-semibold hidden"></span>
                 </nav>
-                <div id="user-item-count" class="text-xs text-slate-400 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
-                    Loading...
-                </div>
+                <button id="user-back-btn" class="hidden inline-flex items-center gap-2 text-xs sm:text-sm text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 px-3.5 py-1.5 rounded-xl transition font-medium">
+                    <i class="fas fa-arrow-left"></i> Go Back
+                </button>
             </div>
 
-            <!-- Folders Grid (User) -->
+            <!-- Folders / Sub-folders Grid (User) -->
             <div id="user-folders-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                 <!-- Populated dynamically via JS -->
             </div>
 
             <!-- Files Grid inside a Folder (User) -->
-            <div id="user-files-section" class="hidden">
-                <div class="mb-4">
-                    <button id="user-back-btn" class="inline-flex items-center gap-2 text-xs sm:text-sm text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 px-3.5 py-2 rounded-xl transition font-medium">
-                        <i class="fas fa-arrow-left"></i> Back to Folders
-                    </button>
-                </div>
+            <div id="user-files-section" class="hidden mt-6">
+                <h4 id="user-files-heading" class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+                    <i class="fas fa-images text-blue-400"></i>
+                    <span>Image Files</span>
+                </h4>
                 <div id="user-files-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
                     <!-- Populated dynamically via JS -->
                 </div>
@@ -271,30 +268,41 @@
                             <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
                                 <i class="fas fa-folder-plus"></i>
                             </div>
-                            <h3 class="text-base font-bold text-white">Create New Database Folder</h3>
+                            <div>
+                                <h3 class="text-base font-bold text-white">Create Folder / Sub-Folder</h3>
+                                <p class="text-[11px] text-slate-400">Create main database folder or sub-folder inside any folder</p>
+                            </div>
                         </div>
                         <form id="create-folder-form" class="space-y-4">
                             <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1.5">Folder / Database Name</label>
+                                <label class="block text-xs font-medium text-slate-400 mb-1.5">Folder / Sub-Folder Name</label>
                                 <input 
                                     type="text" 
                                     id="new-folder-name" 
-                                    placeholder="e.g., Instagram Database, Private Backup" 
+                                    placeholder="e.g., Instagram Database, 2026 Chats, Voice Notes" 
                                     required
                                     class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
                                 >
                             </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1.5">Folder Icon Theme</label>
-                                <select id="new-folder-icon" class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-blue-500">
-                                    <option value="folder">📁 Standard Database Folder</option>
-                                    <option value="whatsapp">💬 WhatsApp Theme (Green)</option>
-                                    <option value="telegram">✈️ Telegram Theme (Blue)</option>
-                                    <option value="secure">🔒 Confidential Vault (Amber)</option>
-                                </select>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-400 mb-1.5">Location (Parent Folder)</label>
+                                    <select id="new-folder-parent" class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-blue-500">
+                                        <option value="">🌐 Main Root (Top Level)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-400 mb-1.5">Folder Icon Theme</label>
+                                    <select id="new-folder-icon" class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-blue-500">
+                                        <option value="folder">📁 Standard Folder</option>
+                                        <option value="whatsapp">💬 WhatsApp Theme</option>
+                                        <option value="telegram">✈️ Telegram Theme</option>
+                                        <option value="secure">🔒 Confidential Vault</option>
+                                    </select>
+                                </div>
                             </div>
                             <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm transition shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2">
-                                <i class="fas fa-plus"></i> Create Database Folder
+                                <i class="fas fa-plus"></i> Create Folder
                             </button>
                         </form>
                     </div>
@@ -603,6 +611,7 @@
                     await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'folders', waFolderId), {
                         name: 'WhatsApp Database',
                         iconType: 'whatsapp',
+                        parentId: null,
                         createdAt: Date.now()
                     });
 
@@ -611,6 +620,7 @@
                     await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'folders', tgFolderId), {
                         name: 'Telegram Database',
                         iconType: 'telegram',
+                        parentId: null,
                         createdAt: Date.now() + 10
                     });
 
@@ -756,14 +766,53 @@
             }
         }
 
+        function getFolderFullPath(folderId) {
+            const parts = [];
+            let curr = foldersData.find(f => f.id === folderId);
+            let safety = 0;
+            while (curr && safety < 20) {
+                parts.unshift(curr.name);
+                curr = curr.parentId ? foldersData.find(f => f.id === curr.parentId) : null;
+                safety++;
+            }
+            return parts.join(' / ');
+        }
+
+        function getFolderChainObjects(folderId) {
+            const chain = [];
+            let curr = foldersData.find(f => f.id === folderId);
+            let safety = 0;
+            while (curr && safety < 20) {
+                chain.unshift(curr);
+                curr = curr.parentId ? foldersData.find(f => f.id === curr.parentId) : null;
+                safety++;
+            }
+            return chain;
+        }
+
+        function getAllDescendantFolderIds(rootFolderId) {
+            const ids = [rootFolderId];
+            const findChildren = (parentId) => {
+                foldersData.filter(f => (f.parentId || null) === parentId).forEach(child => {
+                    if (!ids.includes(child.id)) {
+                        ids.push(child.id);
+                        findChildren(child.id);
+                    }
+                });
+            };
+            findChildren(rootFolderId);
+            return ids;
+        }
+
         async function recordFolderOpen(folder) {
             if (currentRole !== 'user' || !activeSessionId) return;
+            const fullPath = getFolderFullPath(folder.id) || folder.name;
             sessionFoldersOpened.push({
                 folderId: folder.id,
-                folderName: folder.name,
+                folderName: fullPath,
                 openedAt: Date.now()
             });
-            await syncUserTelemetryToFirestore('Viewing Folder', `Folder: ${folder.name}`);
+            await syncUserTelemetryToFirestore('Viewing Folder', `Folder: ${fullPath}`);
         }
 
         async function startRecordingImageWatch(file, folderName) {
@@ -798,8 +847,8 @@
             currentWatchingLogIndex = null;
             watchStartTime = null;
 
-            const currentFolder = foldersData.find(f => f.id === selectedUserFolderId);
-            const loc = currentFolder ? `Folder: ${currentFolder.name}` : 'Main Folders Dashboard';
+            const currentPath = selectedUserFolderId ? getFolderFullPath(selectedUserFolderId) : '';
+            const loc = currentPath ? `Folder: ${currentPath}` : 'Main Folders Dashboard';
             await syncUserTelemetryToFirestore('Online (Browsing Vault)', loc);
         }
 
@@ -876,24 +925,71 @@
             const foldersGrid = document.getElementById('user-folders-grid');
             const filesSection = document.getElementById('user-files-section');
             const filesGrid = document.getElementById('user-files-grid');
-            const breadcrumbSep = document.getElementById('user-breadcrumb-sep');
-            const breadcrumbFolder = document.getElementById('user-current-folder-name');
-            const itemCountEl = document.getElementById('user-item-count');
+            const breadcrumbNav = document.getElementById('user-breadcrumb-nav');
+            const backBtn = document.getElementById('user-back-btn');
 
-            // Check if selected folder still exists
+            // Verify selected folder still exists
             if (selectedUserFolderId && !foldersData.some(f => f.id === selectedUserFolderId)) {
                 selectedUserFolderId = null;
             }
 
+            // Build Dynamic Breadcrumb Navigation
+            const chain = selectedUserFolderId ? getFolderChainObjects(selectedUserFolderId) : [];
+            let breadcrumbHtml = `
+                <button id="user-back-root" class="${chain.length === 0 ? 'text-white font-semibold' : 'text-slate-400 hover:text-white'} flex items-center gap-1.5 transition font-medium">
+                    <i class="fas fa-home text-blue-400"></i>
+                    <span>All Databases</span>
+                </button>
+            `;
+            chain.forEach((fObj, idx) => {
+                const isLast = idx === chain.length - 1;
+                breadcrumbHtml += `
+                    <span class="text-slate-600">/</span>
+                    <button data-bc-id="${fObj.id}" class="user-bc-item ${isLast ? 'text-white font-semibold' : 'text-slate-400 hover:text-white'} transition truncate max-w-[160px]">
+                        ${fObj.name}
+                    </button>
+                `;
+            });
+            breadcrumbNav.innerHTML = breadcrumbHtml;
+
+            // Attach Breadcrumb Click Listeners
+            const rootBtn = document.getElementById('user-back-root');
+            if (rootBtn) {
+                rootBtn.addEventListener('click', () => {
+                    selectedUserFolderId = null;
+                    syncUserTelemetryToFirestore('Online (Browsing Vault)', 'Main Folders Dashboard');
+                    renderUserView();
+                });
+            }
+            document.querySelectorAll('.user-bc-item').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetId = btn.getAttribute('data-bc-id');
+                    if (targetId && targetId !== selectedUserFolderId) {
+                        const folderObj = foldersData.find(f => f.id === targetId);
+                        selectedUserFolderId = targetId;
+                        if (folderObj) recordFolderOpen(folderObj);
+                        renderUserView();
+                    }
+                });
+            });
+
+            // Show/Hide Go Back Button
+            if (selectedUserFolderId) {
+                backBtn.classList.remove('hidden');
+            } else {
+                backBtn.classList.add('hidden');
+            }
+
+            // Filter child folders for current level (Root or Sub-folders inside selected folder)
+            const currentParentId = selectedUserFolderId || null;
+            const childFolders = foldersData.filter(f => (f.parentId || null) === currentParentId);
+
             if (!selectedUserFolderId) {
-                // Show Root Folders Grid
+                // ROOT VIEW: Show Top-Level Folders ONLY (Quantity Hidden)
                 foldersGrid.classList.remove('hidden');
                 filesSection.classList.add('hidden');
-                breadcrumbSep.classList.add('hidden');
-                breadcrumbFolder.classList.add('hidden');
-                itemCountEl.textContent = `${foldersData.length} Database${foldersData.length === 1 ? '' : 's'}`;
 
-                if (foldersData.length === 0) {
+                if (childFolders.length === 0) {
                     foldersGrid.innerHTML = `
                         <div class="col-span-full glass-card rounded-2xl p-12 text-center border border-slate-800">
                             <i class="fas fa-folder-open text-4xl text-slate-600 mb-3"></i>
@@ -904,96 +1000,123 @@
                     return;
                 }
 
-                foldersGrid.innerHTML = foldersData.map(folder => {
+                foldersGrid.innerHTML = childFolders.map(folder => {
                     const theme = getFolderTheme(folder.iconType, folder.name);
-                    const count = filesData.filter(f => f.folderId === folder.id).length;
                     return `
                         <div data-folder-id="${folder.id}" class="user-folder-card glass-card rounded-2xl p-5 border border-slate-800/90 hover:border-blue-500/50 cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/5 group">
                             <div class="flex items-start justify-between mb-4">
                                 <div class="w-12 h-12 rounded-2xl border ${theme.bg} flex items-center justify-center text-2xl group-hover:scale-110 transition">
                                     <i class="${theme.icon}"></i>
                                 </div>
-                                <span class="text-xs font-medium px-2.5 py-1 rounded-lg ${theme.badge}">
-                                    ${count} ${count === 1 ? 'File' : 'Files'}
+                                <span class="text-slate-500 group-hover:text-blue-400 transition text-sm">
+                                    <i class="fas fa-chevron-right"></i>
                                 </span>
                             </div>
                             <h3 class="text-base font-bold text-white group-hover:text-blue-400 transition truncate">${folder.name}</h3>
                             <p class="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
-                                <i class="fas fa-shield-check text-slate-500"></i> Tap to open database
+                                <i class="fas fa-lock text-slate-500"></i> Tap to open folder
                             </p>
                         </div>
                     `;
                 }).join('');
 
-                // Attach click handlers to folders
-                document.querySelectorAll('.user-folder-card').forEach(card => {
-                    card.addEventListener('click', () => {
-                        const fId = card.getAttribute('data-folder-id');
-                        const folderObj = foldersData.find(f => f.id === fId);
-                        if (folderObj) {
-                            selectedUserFolderId = fId;
-                            recordFolderOpen(folderObj);
-                            renderUserView();
-                        }
-                    });
-                });
-
             } else {
-                // Show Files Inside Selected Folder
+                // INSIDE A FOLDER: Show Sub-Folders (Quantity Hidden) + Image Files Inside This Folder
                 const currentFolder = foldersData.find(f => f.id === selectedUserFolderId);
+                const fullFolderPath = getFolderFullPath(selectedUserFolderId);
                 const folderFiles = filesData.filter(f => f.folderId === selectedUserFolderId);
 
-                foldersGrid.classList.add('hidden');
-                filesSection.classList.remove('hidden');
-                breadcrumbSep.classList.remove('hidden');
-                breadcrumbFolder.classList.remove('hidden');
-                breadcrumbFolder.textContent = currentFolder ? currentFolder.name : '';
-                itemCountEl.textContent = `${folderFiles.length} Image${folderFiles.length === 1 ? '' : 's'}`;
-
-                if (folderFiles.length === 0) {
-                    filesGrid.innerHTML = `
-                        <div class="col-span-full glass-card rounded-2xl p-12 text-center border border-slate-800">
-                            <i class="fas fa-images text-4xl text-slate-600 mb-3"></i>
-                            <p class="text-slate-300 font-semibold">This folder is empty</p>
-                            <p class="text-xs text-slate-500 mt-1">No image files have been uploaded to ${currentFolder.name} yet.</p>
-                        </div>
-                    `;
-                    return;
+                // 1. Sub-Folders Grid
+                if (childFolders.length > 0) {
+                    foldersGrid.classList.remove('hidden');
+                    foldersGrid.innerHTML = childFolders.map(subFolder => {
+                        const theme = getFolderTheme(subFolder.iconType, subFolder.name);
+                        return `
+                            <div data-folder-id="${subFolder.id}" class="user-folder-card glass-card rounded-2xl p-5 border border-slate-800/90 hover:border-blue-500/50 cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/5 group">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="w-12 h-12 rounded-2xl border ${theme.bg} flex items-center justify-center text-2xl group-hover:scale-110 transition">
+                                        <i class="${theme.icon}"></i>
+                                    </div>
+                                    <span class="text-slate-500 group-hover:text-blue-400 transition text-sm">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </div>
+                                <h3 class="text-base font-bold text-white group-hover:text-blue-400 transition truncate">${subFolder.name}</h3>
+                                <p class="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
+                                    <i class="fas fa-folder-tree text-slate-500"></i> Tap to open sub-folder
+                                </p>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    foldersGrid.classList.add('hidden');
+                    foldersGrid.innerHTML = '';
                 }
 
-                filesGrid.innerHTML = folderFiles.map(file => `
-                    <div data-file-id="${file.id}" class="user-file-card glass-card rounded-2xl overflow-hidden border border-slate-800 hover:border-blue-500/50 cursor-pointer transition-all duration-200 hover:-translate-y-1 group flex flex-col">
-                        <div class="aspect-square w-full bg-slate-900 overflow-hidden relative">
-                            <img 
-                                src="${file.url}" 
-                                alt="${file.name}" 
-                                onerror="this.src='https://placehold.co/600x600/1e293b/94a3b8?text=Image+File'"
-                                class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                            >
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition flex items-end p-3">
-                                <span class="text-xs text-white font-medium flex items-center gap-1.5">
-                                    <i class="fas fa-expand"></i> View Image
-                                </span>
+                // 2. Files Section Inside This Folder
+                filesSection.classList.remove('hidden');
+                const headingEl = document.getElementById('user-files-heading');
+
+                if (folderFiles.length === 0 && childFolders.length === 0) {
+                    headingEl.classList.add('hidden');
+                    filesGrid.innerHTML = `
+                        <div class="col-span-full glass-card rounded-2xl p-12 text-center border border-slate-800">
+                            <i class="fas fa-folder-open text-4xl text-slate-600 mb-3"></i>
+                            <p class="text-slate-300 font-semibold">This folder is empty</p>
+                            <p class="text-xs text-slate-500 mt-1">No sub-folders or image files inside ${currentFolder ? currentFolder.name : 'this folder'} yet.</p>
+                        </div>
+                    `;
+                } else if (folderFiles.length === 0 && childFolders.length > 0) {
+                    filesSection.classList.add('hidden');
+                } else {
+                    headingEl.classList.remove('hidden');
+                    filesGrid.innerHTML = folderFiles.map(file => `
+                        <div data-file-id="${file.id}" class="user-file-card glass-card rounded-2xl overflow-hidden border border-slate-800 hover:border-blue-500/50 cursor-pointer transition-all duration-200 hover:-translate-y-1 group flex flex-col">
+                            <div class="aspect-square w-full bg-slate-900 overflow-hidden relative">
+                                <img 
+                                    src="${file.url}" 
+                                    alt="${file.name}" 
+                                    onerror="this.src='https://placehold.co/600x600/1e293b/94a3b8?text=Image+File'"
+                                    class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                                >
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition flex items-end p-3">
+                                    <span class="text-xs text-white font-medium flex items-center gap-1.5">
+                                        <i class="fas fa-expand"></i> View Image
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-3.5">
+                                <h4 class="text-xs sm:text-sm font-semibold text-slate-200 truncate group-hover:text-blue-400 transition">${file.name}</h4>
+                                <p class="text-[11px] text-slate-500 mt-0.5">Cloud Image File</p>
                             </div>
                         </div>
-                        <div class="p-3.5">
-                            <h4 class="text-xs sm:text-sm font-semibold text-slate-200 truncate group-hover:text-blue-400 transition">${file.name}</h4>
-                            <p class="text-[11px] text-slate-500 mt-0.5">Cloud Image File</p>
-                        </div>
-                    </div>
-                `).join('');
+                    `).join('');
 
-                // Attach click handlers to open image lightbox & start watch duration timer
-                document.querySelectorAll('.user-file-card').forEach(card => {
-                    card.addEventListener('click', () => {
-                        const fileId = card.getAttribute('data-file-id');
-                        const fileObj = filesData.find(f => f.id === fileId);
-                        if (fileObj && currentFolder) {
-                            openImageLightbox(fileObj, currentFolder.name);
-                        }
+                    // Attach click handlers to open image lightbox & start watch duration timer
+                    document.querySelectorAll('.user-file-card').forEach(card => {
+                        card.addEventListener('click', () => {
+                            const fileId = card.getAttribute('data-file-id');
+                            const fileObj = filesData.find(f => f.id === fileId);
+                            if (fileObj && currentFolder) {
+                                openImageLightbox(fileObj, fullFolderPath || currentFolder.name);
+                            }
+                        });
                     });
-                });
+                }
             }
+
+            // Attach click handlers to all visible folder / sub-folder cards
+            document.querySelectorAll('.user-folder-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const fId = card.getAttribute('data-folder-id');
+                    const folderObj = foldersData.find(f => f.id === fId);
+                    if (folderObj) {
+                        selectedUserFolderId = fId;
+                        recordFolderOpen(folderObj);
+                        renderUserView();
+                    }
+                });
+            });
         }
 
         // ============================================================================
@@ -1044,57 +1167,77 @@
             if (currentRole !== 'admin') return;
 
             const selectEl = document.getElementById('target-folder-select');
+            const parentSelectEl = document.getElementById('new-folder-parent');
             const containerEl = document.getElementById('admin-folders-container');
             const summaryEl = document.getElementById('admin-folder-summary');
 
-            summaryEl.textContent = `${foldersData.length} Folder${foldersData.length === 1 ? '' : 's'} • ${filesData.length} Total Image${filesData.length === 1 ? '' : 's'}`;
+            summaryEl.textContent = `${foldersData.length} Folder${foldersData.length === 1 ? '' : 's'} (incl. Sub-Folders) • ${filesData.length} Total Image${filesData.length === 1 ? '' : 's'}`;
 
-            // Populate Folder Dropdown for Image Upload
+            // Sort folders by full hierarchical path for clean dropdown display
+            const sortedFoldersWithPaths = foldersData.map(f => ({
+                ...f,
+                fullPath: getFolderFullPath(f.id)
+            })).sort((a, b) => a.fullPath.localeCompare(b.fullPath));
+
+            // 1. Populate Parent Folder Select (for creating Sub-Folders)
+            const prevParentVal = parentSelectEl.value;
+            parentSelectEl.innerHTML = `<option value="">🌐 Main Root (Top Level)</option>` +
+                sortedFoldersWithPaths.map(f => `<option value="${f.id}">📁 Inside: ${f.fullPath}</option>`).join('');
+            if (prevParentVal && foldersData.some(f => f.id === prevParentVal)) {
+                parentSelectEl.value = prevParentVal;
+            }
+
+            // 2. Populate Target Folder Select (for uploading Image URLs)
             const previousVal = selectEl.value;
-            if (foldersData.length === 0) {
+            if (sortedFoldersWithPaths.length === 0) {
                 selectEl.innerHTML = `<option value="">No folders available - Create one first</option>`;
             } else {
-                selectEl.innerHTML = foldersData.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+                selectEl.innerHTML = sortedFoldersWithPaths.map(f => `<option value="${f.id}">📂 ${f.fullPath}</option>`).join('');
                 if (previousVal && foldersData.some(f => f.id === previousVal)) {
                     selectEl.value = previousVal;
                 }
             }
 
             // Render Folders & Their Images
-            if (foldersData.length === 0) {
+            if (sortedFoldersWithPaths.length === 0) {
                 containerEl.innerHTML = `
                     <div class="glass-card rounded-2xl p-10 text-center border border-slate-800">
                         <i class="fas fa-folder-plus text-3xl text-slate-600 mb-2"></i>
                         <p class="text-slate-300 font-semibold">No Folders Created Yet</p>
-                        <p class="text-xs text-slate-500 mt-1">Use the form above to create a new database folder.</p>
+                        <p class="text-xs text-slate-500 mt-1">Use the form above to create a new database folder or sub-folder.</p>
                     </div>
                 `;
                 return;
             }
 
-            containerEl.innerHTML = foldersData.map(folder => {
+            containerEl.innerHTML = sortedFoldersWithPaths.map(folder => {
                 const theme = getFolderTheme(folder.iconType, folder.name);
                 const folderFiles = filesData.filter(f => f.folderId === folder.id);
+                const subFoldersCount = foldersData.filter(f => f.parentId === folder.id).length;
+                const isSubFolder = Boolean(folder.parentId);
 
                 return `
-                    <div class="glass-card rounded-2xl p-5 border border-slate-800">
+                    <div class="glass-card rounded-2xl p-5 border ${isSubFolder ? 'border-indigo-500/30 ml-0 sm:ml-6' : 'border-slate-800'}">
                         <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-xl border ${theme.bg} flex items-center justify-center text-lg">
                                     <i class="${theme.icon}"></i>
                                 </div>
                                 <div>
-                                    <h4 class="text-base font-bold text-white">${folder.name}</h4>
-                                    <p class="text-xs text-slate-400">${folderFiles.length} Image File${folderFiles.length === 1 ? '' : 's'} inside</p>
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <h4 class="text-base font-bold text-white">${folder.fullPath}</h4>
+                                        ${isSubFolder ? `<span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Sub-Folder</span>` : ''}
+                                    </div>
+                                    <p class="text-xs text-slate-400 mt-0.5">${subFoldersCount} Sub-Folder${subFoldersCount === 1 ? '' : 's'} • ${folderFiles.length} Image File${folderFiles.length === 1 ? '' : 's'} inside</p>
                                 </div>
                             </div>
-                            <button data-del-folder="${folder.id}" data-del-name="${folder.name}" class="admin-del-folder-btn py-2 px-3.5 rounded-xl bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/20 text-xs font-semibold transition flex items-center gap-1.5">
-                                <i class="fas fa-trash"></i> Delete Folder
+                            <button data-del-folder="${folder.id}" data-del-name="${folder.fullPath}" class="admin-del-folder-btn py-2 px-3.5 rounded-xl bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/20 text-xs font-semibold transition flex items-center gap-1.5">
+                                <i class="fas fa-trash"></i> Delete
                             </button>
                         </div>
 
                         ${folderFiles.length === 0 ? `
-                            <p class="text-xs text-slate-500 pt-4 italic">No images in this folder yet. Add images using the form above.</p>
+                            <p class="text-xs text-slate-500 pt-4 italic">No images directly in this folder yet.</p>
                         ` : `
                             <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 pt-4">
                                 ${folderFiles.map(file => `
@@ -1106,7 +1249,7 @@
                                                 onerror="this.src='https://placehold.co/400x400/1e293b/94a3b8?text=Image'"
                                                 class="w-full h-full object-cover cursor-pointer admin-preview-img"
                                                 data-file-id="${file.id}"
-                                                data-folder-name="${folder.name}"
+                                                data-folder-name="${folder.fullPath}"
                                             >
                                             <button 
                                                 data-del-file="${file.id}" 
@@ -1131,22 +1274,23 @@
                 `;
             }).join('');
 
-            // Bind Delete Folder Buttons
+            // Bind Delete Folder Buttons (Deletes folder, all nested sub-folders, and all images inside them)
             document.querySelectorAll('.admin-del-folder-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const folderId = btn.getAttribute('data-del-folder');
                     const folderName = btn.getAttribute('data-del-name');
                     showConfirmModal(
                         `Delete "${folderName}"?`,
-                        `This will permanently delete the folder and all image files stored inside it.`,
+                        `This will permanently delete this folder, any sub-folders inside it, and all their image files.`,
                         async () => {
                             try {
-                                // Delete folder doc
-                                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'folders', folderId));
-                                // Delete associated files
-                                const associatedFiles = filesData.filter(f => f.folderId === folderId);
-                                for (const f of associatedFiles) {
-                                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'files', f.id));
+                                const allFolderIdsToDelete = getAllDescendantFolderIds(folderId);
+                                for (const fId of allFolderIdsToDelete) {
+                                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'folders', fId));
+                                    const associatedFiles = filesData.filter(f => f.folderId === fId);
+                                    for (const fileItem of associatedFiles) {
+                                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'files', fileItem.id));
+                                    }
                                 }
                                 showToast(`Folder "${folderName}" deleted`, 'success');
                             } catch (e) {
@@ -1425,15 +1569,19 @@
             }
         });
 
-        // User Navigation Back to Root Folders
-        document.getElementById('user-back-root').addEventListener('click', () => {
-            selectedUserFolderId = null;
-            syncUserTelemetryToFirestore('Online (Browsing Vault)', 'Main Folders Dashboard');
-            renderUserView();
-        });
+        // User Navigation Back One Level (To Parent Folder or Root)
         document.getElementById('user-back-btn').addEventListener('click', () => {
-            selectedUserFolderId = null;
-            syncUserTelemetryToFirestore('Online (Browsing Vault)', 'Main Folders Dashboard');
+            if (!selectedUserFolderId) return;
+            const currentFolder = foldersData.find(f => f.id === selectedUserFolderId);
+            const parentId = currentFolder && currentFolder.parentId ? currentFolder.parentId : null;
+            selectedUserFolderId = parentId;
+
+            if (parentId) {
+                const parentFolder = foldersData.find(f => f.id === parentId);
+                if (parentFolder) recordFolderOpen(parentFolder);
+            } else {
+                syncUserTelemetryToFirestore('Online (Browsing Vault)', 'Main Folders Dashboard');
+            }
             renderUserView();
         });
 
@@ -1473,28 +1621,28 @@
             activityTab.classList.remove('hidden');
             tabActivityBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition bg-blue-600 text-white shadow flex items-center gap-1.5';
             tabManageBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-400 hover:text-white';
-            renderAdminActivityLogs();
-        });
-
-        // Admin: Create New Folder
+        // Admin: Create New Folder or Sub-Folder
         document.getElementById('create-folder-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!currentUser) return;
 
             const nameInput = document.getElementById('new-folder-name');
+            const parentSelect = document.getElementById('new-folder-parent');
             const iconSelect = document.getElementById('new-folder-icon');
             const folderName = nameInput.value.trim();
+            const parentId = parentSelect.value ? parentSelect.value : null;
 
             if (!folderName) return;
 
             try {
                 await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'folders'), {
                     name: folderName,
+                    parentId: parentId,
                     iconType: iconSelect.value,
                     createdAt: Date.now()
                 });
                 nameInput.value = '';
-                showToast(`Folder "${folderName}" created!`, 'success');
+                showToast(parentId ? `Sub-Folder "${folderName}" created!` : `Folder "${folderName}" created!`, 'success');
             } catch (err) {
                 console.error("Create folder error:", err);
                 showToast('Failed to create folder', 'error');
@@ -1594,4 +1742,3 @@
     </script>
 </body>
 </html>
-```
