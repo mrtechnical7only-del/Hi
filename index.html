@@ -1621,6 +1621,9 @@
             activityTab.classList.remove('hidden');
             tabActivityBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition bg-blue-600 text-white shadow flex items-center gap-1.5';
             tabManageBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-400 hover:text-white';
+            renderAdminActivityLogs();
+        });
+
         // Admin: Create New Folder or Sub-Folder
         document.getElementById('create-folder-form').addEventListener('submit', async (e) => {
             e.preventDefault();
