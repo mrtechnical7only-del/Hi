@@ -9,6 +9,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Lucide Icons for WhatsApp Chat UI -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Google Fonts: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -186,6 +188,17 @@
                     <!-- Populated dynamically via JS -->
                 </div>
             </div>
+
+            <!-- WhatsApp Chats Grid inside a Folder (User - Read Only) -->
+            <div id="user-chats-section" class="hidden mt-6">
+                <h4 id="user-chats-heading" class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+                    <i class="fab fa-whatsapp text-emerald-400"></i>
+                    <span>Chat Archives</span>
+                </h4>
+                <div id="user-chats-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
         </div>
     </div>
 
@@ -210,6 +223,294 @@
         <!-- Lightbox Body -->
         <div class="flex-1 flex items-center justify-center p-4 sm:p-8 overflow-auto select-none" id="lightbox-backdrop">
             <img id="lightbox-img" src="" alt="Preview" class="max-h-[80vh] max-w-full object-contain rounded-xl shadow-2xl border border-slate-800">
+        </div>
+    </div>
+
+    <!-- ================= 3B. WHATSAPP CHAT MODAL (READ-ONLY FOR USER, FULL EDITOR FOR ADMIN) ================= -->
+    <div id="whatsapp-chat-modal" class="fixed inset-0 z-50 bg-[#0b141a]/95 backdrop-blur-md hidden flex items-center justify-center sm:p-4 select-none">
+        <!-- Main Mobile/Desktop WhatsApp Frame -->
+        <div class="w-full h-full sm:w-[430px] sm:h-[92vh] sm:max-h-[860px] bg-[#efeae2] sm:rounded-3xl sm:shadow-2xl flex flex-col overflow-hidden relative border-0 sm:border sm:border-gray-800 text-gray-900">
+
+            <!-- WhatsApp Top Header -->
+            <header class="bg-[#008069] text-white px-3 py-2.5 flex items-center justify-between shadow-md z-20 shrink-0">
+                <div class="flex items-center gap-2 min-w-0">
+                    <button id="wa-close-btn" class="p-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition" title="Back to Folder">
+                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                    </button>
+
+                    <!-- Default Blank WhatsApp Avatar with Online Indicator -->
+                    <div id="wa-avatar-wrap" class="relative shrink-0" title="Profile">
+                        <div class="w-10 h-10 rounded-full bg-[#dfe5e7] text-[#8696a0] flex items-center justify-center border border-white/20 overflow-hidden">
+                            <i data-lucide="user" class="w-6 h-6 fill-[#8696a0]"></i>
+                        </div>
+                        <span id="wa-onlineDot" class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#25D366] border-2 border-[#008069] rounded-full"></span>
+                    </div>
+
+                    <!-- Contact Name & Status -->
+                    <div id="wa-name-wrap" class="flex flex-col min-w-0 ml-1">
+                        <div class="flex items-center gap-1">
+                            <h1 id="wa-contactNameDisplay" class="font-semibold text-[16px] leading-tight truncate">Mahira Zanu</h1>
+                            <span id="wa-contactHeart" class="text-xs">❤️</span>
+                        </div>
+                        <p id="wa-contactStatus" class="text-[12px] text-white/85 truncate leading-tight">online</p>
+                    </div>
+                </div>
+
+                <!-- Action Icons -->
+                <div class="flex items-center gap-1 shrink-0">
+                    <span id="wa-sync-indicator" class="hidden text-[10px] bg-white/15 px-2 py-0.5 rounded-full mr-1">Saved</span>
+                    <button id="wa-video-btn" class="p-2 rounded-full hover:bg-white/10 active:bg-white/20 transition" title="Video Call">
+                        <i data-lucide="video" class="w-5 h-5"></i>
+                    </button>
+                    <button id="wa-voice-btn" class="p-2 rounded-full hover:bg-white/10 active:bg-white/20 transition" title="Voice Call">
+                        <i data-lucide="phone" class="w-5 h-5"></i>
+                    </button>
+                    <button id="wa-more-btn" class="hidden p-2 rounded-full hover:bg-white/10 active:bg-white/20 transition relative" title="Show/Hide Edit & Control Options">
+                        <i data-lucide="more-vertical" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Quick Simulation Bar (Admin Only) -->
+            <div id="wa-controlBar" class="hidden bg-[#f0f2f5] border-b border-gray-300 px-3 py-2 flex items-center justify-between gap-2 text-xs z-10 shrink-0 shadow-sm">
+                <div class="flex items-center gap-1.5 w-full justify-between">
+                    <button id="wa-open-receive-btn" class="flex-1 bg-white hover:bg-emerald-50 text-[#008069] border border-[#008069]/30 font-medium py-1.5 px-2 rounded-lg flex items-center justify-center gap-1 shadow-xs active:scale-95 transition">
+                        <i data-lucide="arrow-down-left" class="w-3.5 h-3.5"></i>
+                        <span>Receive Msg</span>
+                    </button>
+                    <button id="wa-auto-reply-btn" class="flex-1 bg-white hover:bg-emerald-50 text-gray-700 border border-gray-300 font-medium py-1.5 px-2 rounded-lg flex items-center justify-center gap-1 shadow-xs active:scale-95 transition">
+                        <i data-lucide="message-square-more" class="w-3.5 h-3.5 text-[#008069]"></i>
+                        <span>Auto Reply</span>
+                    </button>
+                    <button id="wa-failToggleBtn" class="flex-1 bg-white hover:bg-red-50 text-gray-700 border border-gray-300 font-medium py-1.5 px-2 rounded-lg flex items-center justify-center gap-1 shadow-xs active:scale-95 transition" title="Toggle network fail to test Resend">
+                        <i data-lucide="wifi-off" class="w-3.5 h-3.5 text-gray-500"></i>
+                        <span>Fail: OFF</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Wallpaper & Messages Area -->
+            <main id="wa-chatContainer" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2.5 relative scroll-smooth"
+                  style="background-color: #efeae2; background-image: radial-gradient(#cbd5e1 0.85px, transparent 0.85px), radial-gradient(#cbd5e1 0.85px, #efeae2 0.85px); background-size: 34px 34px; background-position: 0 0, 17px 17px;">
+
+                <!-- Encryption Notice -->
+                <div class="flex justify-center my-2">
+                    <div class="bg-[#ffeecd] text-[#54656f] text-[11.5px] px-3 py-1.5 rounded-lg shadow-xs text-center max-w-[88%] flex items-center gap-1.5">
+                        <i data-lucide="lock" class="w-3 h-3 shrink-0 text-[#54656f]"></i>
+                        <span>Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them.</span>
+                    </div>
+                </div>
+
+                <!-- Messages List -->
+                <div id="wa-messagesList" class="space-y-2 pb-2"></div>
+
+                <!-- Typing Indicator Bubble -->
+                <div id="wa-typingBubble" class="hidden flex items-start gap-2">
+                    <div class="bg-white text-gray-800 px-3.5 py-2.5 rounded-2xl rounded-tl-none shadow-xs inline-flex items-center gap-1">
+                        <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0ms;"></span>
+                        <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 150ms;"></span>
+                        <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 300ms;"></span>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Edit Mode Banner (Admin Only) -->
+            <div id="wa-editBanner" class="hidden bg-[#f0f2f5] border-t border-gray-200 px-3 py-2 flex items-center justify-between z-20">
+                <div class="flex items-center gap-2.5 min-w-0 border-l-4 border-[#008069] pl-2.5 py-0.5">
+                    <i data-lucide="pencil" class="w-4 h-4 text-[#008069] shrink-0"></i>
+                    <div class="min-w-0">
+                        <p class="text-xs font-semibold text-[#008069]">Editing message</p>
+                        <p id="wa-editPreviewText" class="text-xs text-gray-600 truncate">Original text...</p>
+                    </div>
+                </div>
+                <button id="wa-cancel-edit-btn" class="p-1.5 text-gray-500 hover:text-gray-800 rounded-full hover:bg-gray-200">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Bottom Input Bar (Admin Only) -->
+            <footer id="wa-footer" class="hidden bg-[#f0f2f5] px-2.5 py-2 flex items-end gap-2 z-20 shrink-0">
+                <div class="flex-1 bg-white rounded-3xl px-3 py-1.5 flex items-center gap-2 shadow-xs border border-gray-100">
+                    <button id="wa-emoji-btn" class="text-gray-500 hover:text-gray-700 p-1 rounded-full transition" title="Add Heart Emoji">
+                        <i data-lucide="smile" class="w-5 h-5"></i>
+                    </button>
+
+                    <input 
+                        type="text" 
+                        id="wa-messageInput" 
+                        placeholder="Message..." 
+                        class="w-full bg-transparent text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none py-1"
+                    >
+
+                    <button id="wa-media-link-btn" class="text-gray-500 hover:text-[#008069] p-1 rounded-full transition" title="Send Image / GIF Link">
+                        <i data-lucide="image" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <button 
+                    id="wa-sendBtn"
+                    class="w-11 h-11 rounded-full bg-[#00a884] hover:bg-[#008f6f] active:scale-95 text-white flex items-center justify-center shadow-md transition shrink-0"
+                    title="Send Message"
+                >
+                    <i data-lucide="send" class="w-5 h-5 ml-0.5"></i>
+                </button>
+            </footer>
+
+            <!-- Message Context Action Modal (Admin Only) -->
+            <div id="wa-actionModal" class="hidden absolute inset-0 bg-black/40 backdrop-blur-[1px] z-30 flex items-end sm:items-center justify-center p-3">
+                <div class="bg-white w-full max-w-[340px] rounded-2xl shadow-xl overflow-hidden" id="wa-actionModalBox">
+                    <div class="bg-[#008069] text-white px-4 py-3 flex items-center justify-between">
+                        <span class="font-semibold text-sm">Message Options</span>
+                        <button id="wa-close-action-btn" class="p-1 rounded-full hover:bg-white/20">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <div class="p-3 bg-gray-50 border-b border-gray-200">
+                        <p id="wa-modalMsgPreview" class="text-xs text-gray-700 italic line-clamp-2">"Message content"</p>
+                    </div>
+
+                    <div class="divide-y divide-gray-100 text-sm">
+                        <button id="wa-act-edit" class="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-gray-50 active:bg-gray-100 text-gray-800">
+                            <i data-lucide="pencil" class="w-4 h-4 text-[#008069]"></i>
+                            <div>
+                                <p class="font-medium">Edit Message</p>
+                                <p class="text-[11px] text-gray-500">Modify text & mark as Edited</p>
+                            </div>
+                        </button>
+
+                        <button id="wa-act-resend" class="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-gray-50 active:bg-gray-100 text-gray-800">
+                            <i data-lucide="rotate-cw" class="w-4 h-4 text-blue-600"></i>
+                            <div>
+                                <p class="font-medium">Resend Message</p>
+                                <p class="text-[11px] text-gray-500">Retry failed send or resend copy</p>
+                            </div>
+                        </button>
+
+                        <button id="wa-act-tick" class="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-gray-50 active:bg-gray-100 text-gray-800">
+                            <i data-lucide="check-check" class="w-4 h-4 text-[#53bdeb]"></i>
+                            <div>
+                                <p class="font-medium">Change Tick Status</p>
+                                <p class="text-[11px] text-gray-500">Cycle Sent → Delivered → Read → Failed</p>
+                            </div>
+                        </button>
+
+                        <button id="wa-act-delete" class="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-red-50 active:bg-red-100 text-red-600">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            <span class="font-medium">Delete Message</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Receive Message Modal (Admin Only) -->
+            <div id="wa-receiveModal" class="hidden absolute inset-0 bg-black/40 backdrop-blur-[1px] z-30 flex items-center justify-center p-4">
+                <div class="bg-white w-full max-w-[350px] rounded-2xl shadow-xl overflow-hidden" id="wa-receiveModalBox">
+                    <div class="bg-[#008069] text-white px-4 py-3 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="arrow-down-left" class="w-4 h-4"></i>
+                            <span id="wa-receiveModalTitle" class="font-semibold text-sm">Receive Message</span>
+                        </div>
+                        <button id="wa-close-receive-btn" class="p-1 rounded-full hover:bg-white/20">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <div class="p-4 space-y-3">
+                        <label id="wa-receiveModalLabel" class="block text-xs font-medium text-gray-600">Type message or paste Image/GIF URL:</label>
+                        <textarea 
+                            id="wa-receiveInput" 
+                            rows="3" 
+                            placeholder="e.g., Kahan ho abhi? ❤️ ya koi Image/GIF link paste karein" 
+                            class="w-full border border-gray-300 rounded-xl p-2.5 text-sm text-gray-800 focus:outline-none focus:border-[#008069]"
+                        ></textarea>
+                        <div class="flex gap-2 justify-end">
+                            <button id="wa-cancel-receive-btn" class="px-3.5 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+                            <button id="wa-confirm-receive-btn" class="px-4 py-2 text-xs font-semibold bg-[#008069] hover:bg-[#006d59] text-white rounded-lg shadow-xs">Receive Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Contact Name Modal (Admin Only) -->
+            <div id="wa-editNameModal" class="hidden absolute inset-0 bg-black/40 backdrop-blur-[1px] z-30 flex items-center justify-center p-4">
+                <div class="bg-white w-full max-w-[340px] rounded-2xl shadow-xl overflow-hidden" id="wa-editNameModalBox">
+                    <div class="bg-[#008069] text-white px-4 py-3 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="user-pen" class="w-4 h-4"></i>
+                            <span class="font-semibold text-sm">Edit Contact Name</span>
+                        </div>
+                        <button id="wa-close-name-btn" class="p-1 rounded-full hover:bg-white/20">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <div class="p-4 space-y-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Contact Name:</label>
+                            <input 
+                                type="text" 
+                                id="wa-contactNameInput" 
+                                placeholder="Enter contact name..." 
+                                class="w-full border border-gray-300 rounded-xl p-2.5 text-sm text-gray-800 focus:outline-none focus:border-[#008069]"
+                            >
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label class="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
+                                <input type="checkbox" id="wa-showHeartToggle" checked class="accent-[#008069] rounded">
+                                <span>Show ❤️ heart next to name</span>
+                            </label>
+                        </div>
+                        <div class="flex gap-2 justify-end pt-1">
+                            <button id="wa-cancel-name-btn" class="px-3.5 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+                            <button id="wa-save-name-btn" class="px-4 py-2 text-xs font-semibold bg-[#008069] hover:bg-[#006d59] text-white rounded-lg shadow-xs">Save Name</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image / GIF Link Modal (Admin Only) -->
+            <div id="wa-mediaLinkModal" class="hidden absolute inset-0 bg-black/40 backdrop-blur-[1px] z-30 flex items-center justify-center p-4">
+                <div class="bg-white w-full max-w-[360px] rounded-2xl shadow-xl overflow-hidden" id="wa-mediaLinkModalBox">
+                    <div class="bg-[#008069] text-white px-4 py-3 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="image" class="w-4 h-4"></i>
+                            <span class="font-semibold text-sm">Send Image / GIF Link</span>
+                        </div>
+                        <button id="wa-close-media-btn" class="p-1 rounded-full hover:bg-white/20">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <div class="p-4 space-y-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Image or GIF URL paste karein:</label>
+                            <input 
+                                type="url" 
+                                id="wa-mediaUrlInput" 
+                                placeholder="https://example.com/photo.jpg or .gif" 
+                                class="w-full border border-gray-300 rounded-xl p-2.5 text-sm text-gray-800 focus:outline-none focus:border-[#008069]"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Caption (optional):</label>
+                            <input 
+                                type="text" 
+                                id="wa-mediaCaptionInput" 
+                                placeholder="Add a caption..." 
+                                class="w-full border border-gray-300 rounded-xl p-2 text-sm text-gray-800 focus:outline-none focus:border-[#008069]"
+                            >
+                        </div>
+                        <div class="flex gap-2 justify-end pt-1">
+                            <button id="wa-cancel-media-btn" class="px-3.5 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+                            <button id="wa-send-media-btn" class="px-4 py-2 text-xs font-semibold bg-[#008069] hover:bg-[#006d59] text-white rounded-lg shadow-xs">Send Media</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WhatsApp Internal Toast -->
+            <div id="wa-toast" class="hidden absolute bottom-20 left-1/2 -translate-x-1/2 bg-gray-900/90 text-white text-xs px-4 py-2 rounded-full shadow-lg z-40 whitespace-nowrap transition-opacity">
+                Notification
+            </div>
+
         </div>
     </div>
 
@@ -369,6 +670,53 @@
                     </div>
                 </div>
 
+                <!-- Create WhatsApp Chat Card (Unlimited Chats in Any Folder / Sub-Folder) -->
+                <div class="glass-card rounded-2xl p-6 border border-emerald-500/30">
+                    <div class="flex items-center gap-2.5 mb-4">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+                            <i class="fab fa-whatsapp text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white">Create WhatsApp Chat in Folder</h3>
+                            <p class="text-[11px] text-slate-400">Add unlimited chats (1, 2, 3, 4...) to any folder/sub-folder. Edit only in Admin, Read-Only for Users, auto-saved to Firebase.</p>
+                        </div>
+                    </div>
+                    <form id="create-chat-form" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                        <div class="md:col-span-4">
+                            <label class="block text-xs font-medium text-slate-400 mb-1.5">Select Target Folder / Sub-Folder</label>
+                            <select id="chat-target-folder-select" required class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500">
+                                <option value="">Loading folders...</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-3">
+                            <label class="block text-xs font-medium text-slate-400 mb-1.5">Chat Title (e.g., Chat 1, Chat 2)</label>
+                            <input 
+                                type="text" 
+                                id="new-chat-title" 
+                                placeholder="e.g., Chat 1 - Mahira" 
+                                required
+                                class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                            >
+                        </div>
+                        <div class="md:col-span-3">
+                            <label class="block text-xs font-medium text-slate-400 mb-1.5">WhatsApp Contact Name</label>
+                            <input 
+                                type="text" 
+                                id="new-chat-contact" 
+                                value="Mahira Zanu"
+                                placeholder="e.g., Mahira Zanu" 
+                                required
+                                class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                            >
+                        </div>
+                        <div class="md:col-span-2">
+                            <button type="submit" id="create-chat-btn" class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2">
+                                <i class="fas fa-plus"></i> Add Chat
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
                 <!-- Existing Folders & Files Explorer (Admin) -->
                 <div>
                     <div class="flex items-center justify-between mb-4">
@@ -481,6 +829,7 @@
         // Collections Data Cache
         let foldersData = [];
         let filesData = [];
+        let chatsData = [];
         let sessionsData = [];
 
         // User View State
@@ -672,6 +1021,7 @@
 
             const foldersCol = collection(db, 'artifacts', appId, 'public', 'data', 'folders');
             const filesCol = collection(db, 'artifacts', appId, 'public', 'data', 'files');
+            const chatsCol = collection(db, 'artifacts', appId, 'public', 'data', 'chats');
             const sessionsCol = collection(db, 'artifacts', appId, 'public', 'data', 'user_sessions');
 
             // Listen to Folders
@@ -689,6 +1039,14 @@
                 renderUserView();
                 renderAdminStorageView();
             }, (err) => console.error("Files listener error:", err));
+
+            // Listen to WhatsApp Chats
+            onSnapshot(chatsCol, (snapshot) => {
+                chatsData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                chatsData.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+                renderUserView();
+                renderAdminStorageView();
+            }, (err) => console.error("Chats listener error:", err));
 
             // Listen to User Telemetry Sessions
             onSnapshot(sessionsCol, (snapshot) => {
@@ -925,6 +1283,8 @@
             const foldersGrid = document.getElementById('user-folders-grid');
             const filesSection = document.getElementById('user-files-section');
             const filesGrid = document.getElementById('user-files-grid');
+            const chatsSection = document.getElementById('user-chats-section');
+            const chatsGrid = document.getElementById('user-chats-grid');
             const breadcrumbNav = document.getElementById('user-breadcrumb-nav');
             const backBtn = document.getElementById('user-back-btn');
 
@@ -988,6 +1348,7 @@
                 // ROOT VIEW: Show Top-Level Folders ONLY (Quantity Hidden)
                 foldersGrid.classList.remove('hidden');
                 filesSection.classList.add('hidden');
+                chatsSection.classList.add('hidden');
 
                 if (childFolders.length === 0) {
                     foldersGrid.innerHTML = `
@@ -1021,10 +1382,11 @@
                 }).join('');
 
             } else {
-                // INSIDE A FOLDER: Show Sub-Folders (Quantity Hidden) + Image Files Inside This Folder
+                // INSIDE A FOLDER: Show Sub-Folders (Quantity Hidden) + Image Files + WhatsApp Chats
                 const currentFolder = foldersData.find(f => f.id === selectedUserFolderId);
                 const fullFolderPath = getFolderFullPath(selectedUserFolderId);
                 const folderFiles = filesData.filter(f => f.folderId === selectedUserFolderId);
+                const folderChats = chatsData.filter(c => c.folderId === selectedUserFolderId);
 
                 // 1. Sub-Folders Grid
                 if (childFolders.length > 0) {
@@ -1057,16 +1419,17 @@
                 filesSection.classList.remove('hidden');
                 const headingEl = document.getElementById('user-files-heading');
 
-                if (folderFiles.length === 0 && childFolders.length === 0) {
+                if (folderFiles.length === 0 && folderChats.length === 0 && childFolders.length === 0) {
                     headingEl.classList.add('hidden');
+                    chatsSection.classList.add('hidden');
                     filesGrid.innerHTML = `
                         <div class="col-span-full glass-card rounded-2xl p-12 text-center border border-slate-800">
                             <i class="fas fa-folder-open text-4xl text-slate-600 mb-3"></i>
                             <p class="text-slate-300 font-semibold">This folder is empty</p>
-                            <p class="text-xs text-slate-500 mt-1">No sub-folders or image files inside ${currentFolder ? currentFolder.name : 'this folder'} yet.</p>
+                            <p class="text-xs text-slate-500 mt-1">No sub-folders, chats, or image files inside ${currentFolder ? currentFolder.name : 'this folder'} yet.</p>
                         </div>
                     `;
-                } else if (folderFiles.length === 0 && childFolders.length > 0) {
+                } else if (folderFiles.length === 0) {
                     filesSection.classList.add('hidden');
                 } else {
                     headingEl.classList.remove('hidden');
@@ -1102,6 +1465,38 @@
                             }
                         });
                     });
+                }
+
+                // 3. WhatsApp Chats Section Inside This Folder (Read-Only for Normal User)
+                if (folderChats.length > 0) {
+                    chatsSection.classList.remove('hidden');
+                    chatsGrid.innerHTML = folderChats.map(chat => `
+                        <div data-chat-id="${chat.id}" class="user-chat-card glass-card rounded-2xl p-4 border border-slate-800 hover:border-emerald-500/50 cursor-pointer transition-all duration-200 hover:-translate-y-1 group flex items-center gap-3.5">
+                            <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition">
+                                <i class="fab fa-whatsapp"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <h4 class="text-sm font-bold text-white group-hover:text-emerald-400 transition truncate">${chat.title || chat.contactName}</h4>
+                                <p class="text-xs text-slate-400 truncate mt-0.5">${chat.contactName || 'WhatsApp Chat'} ${chat.showHeart ? '❤️' : ''}</p>
+                            </div>
+                            <span class="text-slate-500 group-hover:text-emerald-400 transition text-sm shrink-0">
+                                <i class="fas fa-chevron-right"></i>
+                            </span>
+                        </div>
+                    `).join('');
+
+                    document.querySelectorAll('.user-chat-card').forEach(card => {
+                        card.addEventListener('click', () => {
+                            const chatId = card.getAttribute('data-chat-id');
+                            const chatObj = chatsData.find(c => c.id === chatId);
+                            if (chatObj && currentFolder) {
+                                openWhatsAppChat(chatObj, fullFolderPath || currentFolder.name, false);
+                            }
+                        });
+                    });
+                } else {
+                    chatsSection.classList.add('hidden');
+                    chatsGrid.innerHTML = '';
                 }
             }
 
@@ -1167,11 +1562,12 @@
             if (currentRole !== 'admin') return;
 
             const selectEl = document.getElementById('target-folder-select');
+            const chatSelectEl = document.getElementById('chat-target-folder-select');
             const parentSelectEl = document.getElementById('new-folder-parent');
             const containerEl = document.getElementById('admin-folders-container');
             const summaryEl = document.getElementById('admin-folder-summary');
 
-            summaryEl.textContent = `${foldersData.length} Folder${foldersData.length === 1 ? '' : 's'} (incl. Sub-Folders) • ${filesData.length} Total Image${filesData.length === 1 ? '' : 's'}`;
+            summaryEl.textContent = `${foldersData.length} Folder${foldersData.length === 1 ? '' : 's'} • ${filesData.length} Image${filesData.length === 1 ? '' : 's'} • ${chatsData.length} Chat${chatsData.length === 1 ? '' : 's'}`;
 
             // Sort folders by full hierarchical path for clean dropdown display
             const sortedFoldersWithPaths = foldersData.map(f => ({
@@ -1187,14 +1583,23 @@
                 parentSelectEl.value = prevParentVal;
             }
 
-            // 2. Populate Target Folder Select (for uploading Image URLs)
+            // 2. Populate Target Folder Select (for uploading Image URLs & Creating Chats)
             const previousVal = selectEl.value;
+            const prevChatFolderVal = chatSelectEl ? chatSelectEl.value : '';
             if (sortedFoldersWithPaths.length === 0) {
                 selectEl.innerHTML = `<option value="">No folders available - Create one first</option>`;
+                if (chatSelectEl) chatSelectEl.innerHTML = `<option value="">No folders available - Create one first</option>`;
             } else {
-                selectEl.innerHTML = sortedFoldersWithPaths.map(f => `<option value="${f.id}">📂 ${f.fullPath}</option>`).join('');
+                const folderOptionsHtml = sortedFoldersWithPaths.map(f => `<option value="${f.id}">📂 ${f.fullPath}</option>`).join('');
+                selectEl.innerHTML = folderOptionsHtml;
                 if (previousVal && foldersData.some(f => f.id === previousVal)) {
                     selectEl.value = previousVal;
+                }
+                if (chatSelectEl) {
+                    chatSelectEl.innerHTML = folderOptionsHtml;
+                    if (prevChatFolderVal && foldersData.some(f => f.id === prevChatFolderVal)) {
+                        chatSelectEl.value = prevChatFolderVal;
+                    }
                 }
             }
 
@@ -1213,6 +1618,7 @@
             containerEl.innerHTML = sortedFoldersWithPaths.map(folder => {
                 const theme = getFolderTheme(folder.iconType, folder.name);
                 const folderFiles = filesData.filter(f => f.folderId === folder.id);
+                const folderChats = chatsData.filter(c => c.folderId === folder.id);
                 const subFoldersCount = foldersData.filter(f => f.parentId === folder.id).length;
                 const isSubFolder = Boolean(folder.parentId);
 
@@ -1228,7 +1634,7 @@
                                         <h4 class="text-base font-bold text-white">${folder.fullPath}</h4>
                                         ${isSubFolder ? `<span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Sub-Folder</span>` : ''}
                                     </div>
-                                    <p class="text-xs text-slate-400 mt-0.5">${subFoldersCount} Sub-Folder${subFoldersCount === 1 ? '' : 's'} • ${folderFiles.length} Image File${folderFiles.length === 1 ? '' : 's'} inside</p>
+                                    <p class="text-xs text-slate-400 mt-0.5">${subFoldersCount} Sub-Folder${subFoldersCount === 1 ? '' : 's'} • ${folderFiles.length} Image${folderFiles.length === 1 ? '' : 's'} • ${folderChats.length} Chat${folderChats.length === 1 ? '' : 's'}</p>
                                 </div>
                             </div>
                             <button data-del-folder="${folder.id}" data-del-name="${folder.fullPath}" class="admin-del-folder-btn py-2 px-3.5 rounded-xl bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/20 text-xs font-semibold transition flex items-center gap-1.5">
@@ -1236,9 +1642,11 @@
                             </button>
                         </div>
 
-                        ${folderFiles.length === 0 ? `
-                            <p class="text-xs text-slate-500 pt-4 italic">No images directly in this folder yet.</p>
-                        ` : `
+                        ${folderFiles.length === 0 && folderChats.length === 0 ? `
+                            <p class="text-xs text-slate-500 pt-4 italic">No images or chats directly in this folder yet.</p>
+                        ` : ''}
+
+                        ${folderFiles.length > 0 ? `
                             <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 pt-4">
                                 ${folderFiles.map(file => `
                                     <div class="bg-slate-900/90 border border-slate-800 rounded-xl overflow-hidden group relative flex flex-col">
@@ -1269,19 +1677,54 @@
                                     </div>
                                 `).join('')}
                             </div>
-                        `}
+                        ` : ''}
+
+                        ${folderChats.length > 0 ? `
+                            <div class="pt-4 mt-4 ${folderFiles.length > 0 ? 'border-t border-slate-800/70' : ''}">
+                                <p class="text-[11px] uppercase tracking-wider font-semibold text-emerald-400 mb-2.5 flex items-center gap-1.5">
+                                    <i class="fab fa-whatsapp"></i> Saved WhatsApp Chats (${folderChats.length})
+                                </p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    ${folderChats.map(chat => {
+                                        let msgCount = 0;
+                                        try { msgCount = JSON.parse(chat.messagesJson || '[]').length; } catch(e) {}
+                                        return `
+                                            <div class="bg-slate-900/90 border border-emerald-500/25 rounded-xl p-3 flex items-center justify-between gap-2.5">
+                                                <div class="flex items-center gap-2.5 min-w-0">
+                                                    <div class="w-9 h-9 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0">
+                                                        <i class="fab fa-whatsapp text-lg"></i>
+                                                    </div>
+                                                    <div class="min-w-0">
+                                                        <p class="text-xs font-bold text-white truncate">${chat.title || chat.contactName}</p>
+                                                        <p class="text-[11px] text-slate-400 truncate">${chat.contactName} • ${msgCount} msg${msgCount === 1 ? '' : 's'}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center gap-1.5 shrink-0">
+                                                    <button data-edit-chat="${chat.id}" data-folder-name="${folder.fullPath}" class="admin-edit-chat-btn px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold transition flex items-center gap-1">
+                                                        <i class="fas fa-pen"></i> Edit
+                                                    </button>
+                                                    <button data-del-chat="${chat.id}" data-del-chatname="${chat.title || chat.contactName}" class="admin-del-chat-btn w-7 h-7 rounded-lg bg-red-500/15 hover:bg-red-600 text-red-400 hover:text-white flex items-center justify-center text-xs transition" title="Delete Chat">
+                                                        <i class="fas fa-trash-can"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
                     </div>
                 `;
             }).join('');
 
-            // Bind Delete Folder Buttons (Deletes folder, all nested sub-folders, and all images inside them)
+            // Bind Delete Folder Buttons (Deletes folder, all nested sub-folders, all images & chats inside them)
             document.querySelectorAll('.admin-del-folder-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const folderId = btn.getAttribute('data-del-folder');
                     const folderName = btn.getAttribute('data-del-name');
                     showConfirmModal(
                         `Delete "${folderName}"?`,
-                        `This will permanently delete this folder, any sub-folders inside it, and all their image files.`,
+                        `This will permanently delete this folder, any sub-folders inside it, and all their images and chats.`,
                         async () => {
                             try {
                                 const allFolderIdsToDelete = getAllDescendantFolderIds(folderId);
@@ -1291,10 +1734,44 @@
                                     for (const fileItem of associatedFiles) {
                                         await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'files', fileItem.id));
                                     }
+                                    const associatedChats = chatsData.filter(c => c.folderId === fId);
+                                    for (const chatItem of associatedChats) {
+                                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chats', chatItem.id));
+                                    }
                                 }
                                 showToast(`Folder "${folderName}" deleted`, 'success');
                             } catch (e) {
                                 showToast('Error deleting folder', 'error');
+                            }
+                        }
+                    );
+                });
+            });
+
+            // Bind Edit Chat Buttons (Admin Opens Full Editable WhatsApp Chat)
+            document.querySelectorAll('.admin-edit-chat-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const chatId = btn.getAttribute('data-edit-chat');
+                    const folderName = btn.getAttribute('data-folder-name');
+                    const chatObj = chatsData.find(c => c.id === chatId);
+                    if (chatObj) openWhatsAppChat(chatObj, folderName, true);
+                });
+            });
+
+            // Bind Delete Chat Buttons
+            document.querySelectorAll('.admin-del-chat-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const chatId = btn.getAttribute('data-del-chat');
+                    const chatName = btn.getAttribute('data-del-chatname');
+                    showConfirmModal(
+                        `Delete Chat?`,
+                        `Permanently remove "${chatName}" from Firebase?`,
+                        async () => {
+                            try {
+                                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chats', chatId));
+                                showToast(`Chat "${chatName}" deleted`, 'success');
+                            } catch (err) {
+                                showToast('Failed to delete chat', 'error');
                             }
                         }
                     );
@@ -1715,6 +2192,558 @@
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = `<i class="fas fa-cloud-arrow-up"></i> Save Image URL to Selected Folder`;
+            }
+        });
+
+        // ============================================================================
+        // 11. WHATSAPP CHAT ENGINE (ADMIN EDIT + FIREBASE AUTO-SAVE | USER READ-ONLY)
+        // ============================================================================
+        let waActiveChatId = null;
+        let waIsAdminMode = false;
+        let waMessages = [];
+        let waContactName = 'Mahira Zanu';
+        let waShowHeart = true;
+        let waIsOnline = true;
+        let waSelectedMessageId = null;
+        let waEditingMessageId = null;
+        let waFailNextSend = false;
+        let waToastTimer = null;
+
+        const waAutoReplies = [
+            "Ok done! Main wait karungi ❤️",
+            "Haan zaroor, mujhe message kar dena jab niklo 😊",
+            "Achha theek hai, main ready rehti hoon!",
+            "Haha sahi kaha tumne 😂✨",
+            "Okay Zanu, milte hain phir!"
+        ];
+
+        function waGetCurrentTime() {
+            return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function waEscapeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str || '';
+            return div.innerHTML;
+        }
+
+        function waIsImageOrGifUrl(str) {
+            if (!str) return false;
+            const trimmed = str.trim();
+            if (!/^https?:\/\/\S+$/i.test(trimmed)) return false;
+            return /(\.(jpeg|jpg|gif|png|webp|bmp|svg)(\?.*)?$|giphy\.com|tenor\.com|images\.unsplash\.com|picsum\.photos|placehold\.co)/i.test(trimmed);
+        }
+
+        function waIsGifUrl(str) {
+            return /\.gif(\?.*)?$|giphy\.com|tenor\.com/i.test(str || '');
+        }
+
+        function waShowToast(msg) {
+            const el = document.getElementById('wa-toast');
+            el.textContent = msg;
+            el.classList.remove('hidden');
+            clearTimeout(waToastTimer);
+            waToastTimer = setTimeout(() => el.classList.add('hidden'), 2400);
+        }
+
+        async function saveActiveChatToFirebase() {
+            if (!waIsAdminMode || !waActiveChatId || !currentUser) return;
+            const indicator = document.getElementById('wa-sync-indicator');
+            if (indicator) {
+                indicator.textContent = 'Saving...';
+                indicator.classList.remove('hidden');
+            }
+            try {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chats', waActiveChatId), {
+                    contactName: waContactName,
+                    showHeart: waShowHeart,
+                    isOnline: waIsOnline,
+                    messagesJson: JSON.stringify(waMessages),
+                    updatedAt: Date.now()
+                });
+                if (indicator) indicator.textContent = 'Saved ✓';
+            } catch (err) {
+                console.error('Error saving chat to Firebase:', err);
+                if (indicator) indicator.textContent = 'Save Error';
+            }
+        }
+
+        function renderWhatsAppMessages() {
+            const list = document.getElementById('wa-messagesList');
+            list.innerHTML = '';
+
+            waMessages.forEach(msg => {
+                const isMe = msg.sender === 'me';
+                const wrapper = document.createElement('div');
+                wrapper.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} group`;
+
+                const bubbleBg = isMe ? 'bg-[#d9fdd3]' : 'bg-white';
+                const bubbleCorner = isMe ? 'rounded-tr-none' : 'rounded-tl-none';
+
+                let statusIconHTML = '';
+                if (isMe) {
+                    if (msg.status === 'sent') {
+                        statusIconHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-gray-500"></i>`;
+                    } else if (msg.status === 'delivered') {
+                        statusIconHTML = `<i data-lucide="check-check" class="w-3.5 h-3.5 text-gray-500"></i>`;
+                    } else if (msg.status === 'read') {
+                        statusIconHTML = `<i data-lucide="check-check" class="w-3.5 h-3.5 text-[#53bdeb]"></i>`;
+                    } else if (msg.status === 'failed') {
+                        statusIconHTML = `<span class="text-[10px] font-semibold text-red-600 flex items-center gap-0.5"><i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> Failed</span>`;
+                    }
+                }
+
+                const editedBadge = msg.edited
+                    ? `<span class="text-[10.5px] text-gray-500 italic mr-1">Edited</span>`
+                    : '';
+
+                const resendBanner = (waIsAdminMode && isMe && msg.status === 'failed')
+                    ? `<button data-wa-resend="${msg.id}" class="wa-quick-resend mt-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-[11px] font-medium px-2.5 py-1 rounded-full flex items-center gap-1 shadow-xs transition">
+                        <i data-lucide="rotate-cw" class="w-3 h-3"></i> Tap to Resend
+                       </button>`
+                    : '';
+
+                const mediaUrl = msg.mediaUrl || (waIsImageOrGifUrl(msg.text) ? msg.text.trim() : null);
+                const captionText = msg.mediaUrl ? (msg.text || '') : (mediaUrl ? '' : msg.text);
+                const showGifBadge = mediaUrl && waIsGifUrl(mediaUrl);
+
+                const mediaHTML = mediaUrl ? `
+                    <div class="relative rounded-xl overflow-hidden mb-1 bg-black/5 max-w-[260px]">
+                        <img 
+                            src="${waEscapeHTML(mediaUrl)}" 
+                            alt="Shared media" 
+                            class="w-full max-h-64 object-cover rounded-xl block"
+                            onerror="this.onerror=null; this.src='https://placehold.co/300x200/e2e8f0/475569?text=Image+Preview+Unavailable';"
+                        >
+                        ${showGifBadge ? `<span class="absolute bottom-2 left-2 bg-black/65 text-white text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">GIF</span>` : ''}
+                    </div>
+                ` : '';
+
+                wrapper.innerHTML = `
+                    <div 
+                        data-wa-msg="${msg.id}"
+                        class="wa-msg-bubble relative max-w-[82%] sm:max-w-[78%] ${bubbleBg} ${bubbleCorner} ${mediaUrl ? 'p-1.5' : 'px-3 py-1.5'} rounded-2xl shadow-xs ${waIsAdminMode ? 'cursor-pointer hover:brightness-[0.98]' : ''} transition"
+                    >
+                        ${mediaHTML}
+                        <div class="flex items-start justify-between gap-2 ${mediaUrl ? 'px-1.5' : ''}">
+                            ${captionText ? `<p class="text-[14.5px] text-[#111b21] leading-snug break-words whitespace-pre-wrap">${waEscapeHTML(captionText)}</p>` : '<span></span>'}
+                            ${waIsAdminMode ? `<span class="text-gray-400 hover:text-gray-600 pt-0.5 shrink-0" title="Edit / Options"><i data-lucide="chevron-down" class="w-3.5 h-3.5"></i></span>` : ''}
+                        </div>
+                        <div class="flex items-center justify-end gap-1 mt-0.5 -mb-0.5 ${mediaUrl ? 'px-1.5 pb-0.5' : ''}">
+                            ${editedBadge}
+                            <span class="text-[10.5px] text-[#667781]">${waEscapeHTML(msg.time)}</span>
+                            ${statusIconHTML}
+                        </div>
+                    </div>
+                    ${resendBanner}
+                `;
+                list.appendChild(wrapper);
+            });
+
+            if (waIsAdminMode) {
+                list.querySelectorAll('.wa-msg-bubble').forEach(el => {
+                    el.addEventListener('click', () => {
+                        const msgId = Number(el.getAttribute('data-wa-msg'));
+                        waOpenActionModal(msgId);
+                    });
+                });
+                list.querySelectorAll('.wa-quick-resend').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        waQuickResend(Number(btn.getAttribute('data-wa-resend')));
+                    });
+                });
+            }
+
+            if (window.lucide) window.lucide.createIcons();
+            const container = document.getElementById('wa-chatContainer');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function openWhatsAppChat(chatObj, folderName, isAdminEdit) {
+            waActiveChatId = chatObj.id;
+            waIsAdminMode = Boolean(isAdminEdit);
+            waContactName = chatObj.contactName || 'Mahira Zanu';
+            waShowHeart = chatObj.showHeart !== false;
+            waIsOnline = chatObj.isOnline !== false;
+            waEditingMessageId = null;
+            waSelectedMessageId = null;
+            waFailNextSend = false;
+
+            try {
+                waMessages = JSON.parse(chatObj.messagesJson || '[]');
+            } catch (e) {
+                waMessages = [];
+            }
+
+            // Update Header UI
+            document.getElementById('wa-contactNameDisplay').textContent = waContactName;
+            document.getElementById('wa-contactHeart').classList.toggle('hidden', !waShowHeart);
+            document.getElementById('wa-contactStatus').textContent = waIsOnline ? 'online' : 'last seen recently';
+            document.getElementById('wa-onlineDot').classList.toggle('hidden', !waIsOnline);
+            document.getElementById('wa-messageInput').placeholder = `Message ${waContactName}...`;
+
+            // Toggle Admin-only controls vs Read-Only User view
+            const avatarWrap = document.getElementById('wa-avatar-wrap');
+            const nameWrap = document.getElementById('wa-name-wrap');
+            const moreBtn = document.getElementById('wa-more-btn');
+            const controlBar = document.getElementById('wa-controlBar');
+            const footer = document.getElementById('wa-footer');
+            const syncInd = document.getElementById('wa-sync-indicator');
+
+            document.getElementById('wa-editBanner').classList.add('hidden');
+            document.getElementById('wa-actionModal').classList.add('hidden');
+            document.getElementById('wa-receiveModal').classList.add('hidden');
+            document.getElementById('wa-editNameModal').classList.add('hidden');
+            document.getElementById('wa-mediaLinkModal').classList.add('hidden');
+
+            if (waIsAdminMode) {
+                avatarWrap.classList.add('cursor-pointer');
+                nameWrap.classList.add('cursor-pointer');
+                moreBtn.classList.remove('hidden');
+                controlBar.classList.remove('hidden');
+                footer.classList.remove('hidden');
+                syncInd.classList.remove('hidden');
+                syncInd.textContent = 'Synced ✓';
+            } else {
+                avatarWrap.classList.remove('cursor-pointer');
+                nameWrap.classList.remove('cursor-pointer');
+                moreBtn.classList.add('hidden');
+                controlBar.classList.add('hidden');
+                footer.classList.add('hidden');
+                syncInd.classList.add('hidden');
+            }
+
+            document.getElementById('whatsapp-chat-modal').classList.remove('hidden');
+            renderWhatsAppMessages();
+
+            // Stealth watch tracking for Normal User
+            if (currentRole === 'user' && !waIsAdminMode) {
+                startRecordingImageWatch(
+                    { id: chatObj.id, name: `[CHAT] ${chatObj.title || waContactName}`, url: '' },
+                    folderName
+                );
+            }
+        }
+
+        function closeWhatsAppChat() {
+            document.getElementById('whatsapp-chat-modal').classList.add('hidden');
+            waActiveChatId = null;
+            if (currentRole === 'user' && !waIsAdminMode) {
+                stopRecordingImageWatch();
+            }
+        }
+
+        function waOpenActionModal(msgId) {
+            if (!waIsAdminMode) return;
+            const msg = waMessages.find(m => m.id === msgId);
+            if (!msg) return;
+            waSelectedMessageId = msgId;
+            const preview = msg.mediaUrl ? `[Image/GIF] ${msg.text || msg.mediaUrl}` : msg.text;
+            document.getElementById('wa-modalMsgPreview').textContent = `"${preview}"`;
+            document.getElementById('wa-act-tick').classList.toggle('hidden', msg.sender !== 'me');
+            document.getElementById('wa-actionModal').classList.remove('hidden');
+            if (window.lucide) window.lucide.createIcons();
+        }
+
+        function waCancelEdit() {
+            waEditingMessageId = null;
+            document.getElementById('wa-messageInput').value = '';
+            document.getElementById('wa-editBanner').classList.add('hidden');
+            document.getElementById('wa-sendBtn').innerHTML = `<i data-lucide="send" class="w-5 h-5 ml-0.5"></i>`;
+            if (window.lucide) window.lucide.createIcons();
+        }
+
+        function waHandleSendOrSave() {
+            if (!waIsAdminMode) return;
+            const input = document.getElementById('wa-messageInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            if (waEditingMessageId !== null) {
+                const idx = waMessages.findIndex(m => m.id === waEditingMessageId);
+                if (idx !== -1) {
+                    if (waMessages[idx].mediaUrl && waIsImageOrGifUrl(text)) {
+                        waMessages[idx].mediaUrl = text;
+                    } else {
+                        waMessages[idx].text = text;
+                        if (!waMessages[idx].mediaUrl && waIsImageOrGifUrl(text)) {
+                            waMessages[idx].mediaUrl = text;
+                            waMessages[idx].text = '';
+                        }
+                    }
+                    waMessages[idx].edited = true;
+                    waShowToast('Message edited');
+                }
+                waCancelEdit();
+                renderWhatsAppMessages();
+                saveActiveChatToFirebase();
+                return;
+            }
+
+            const detectedMedia = waIsImageOrGifUrl(text) ? text : null;
+            const newMsg = {
+                id: Date.now(),
+                sender: 'me',
+                text: detectedMedia ? '' : text,
+                mediaUrl: detectedMedia,
+                time: waGetCurrentTime(),
+                status: waFailNextSend ? 'failed' : 'read',
+                edited: false
+            };
+
+            waMessages.push(newMsg);
+            input.value = '';
+            renderWhatsAppMessages();
+            saveActiveChatToFirebase();
+            if (waFailNextSend) waShowToast('Message failed! Tap "Resend" to retry.');
+        }
+
+        function waQuickResend(id) {
+            if (!waIsAdminMode) return;
+            const msg = waMessages.find(m => m.id === id);
+            if (!msg) return;
+            msg.status = 'read';
+            msg.time = waGetCurrentTime();
+            renderWhatsAppMessages();
+            saveActiveChatToFirebase();
+            waShowToast('Message resent!');
+        }
+
+        function waReceiveMessage(text) {
+            if (!waIsAdminMode) return;
+            const typing = document.getElementById('wa-typingBubble');
+            const statusText = document.getElementById('wa-contactStatus');
+            typing.classList.remove('hidden');
+            statusText.textContent = 'typing...';
+
+            setTimeout(() => {
+                typing.classList.add('hidden');
+                statusText.textContent = waIsOnline ? 'online' : 'last seen today at ' + waGetCurrentTime();
+                const detectedMedia = waIsImageOrGifUrl(text) ? text.trim() : null;
+                waMessages.push({
+                    id: Date.now(),
+                    sender: 'them',
+                    text: detectedMedia ? '' : text,
+                    mediaUrl: detectedMedia,
+                    time: waGetCurrentTime(),
+                    status: 'read',
+                    edited: false
+                });
+                renderWhatsAppMessages();
+                saveActiveChatToFirebase();
+                waShowToast(`Received from ${waContactName}`);
+            }, 600);
+        }
+
+        // Bind WhatsApp Modal Controls
+        document.getElementById('wa-close-btn').addEventListener('click', closeWhatsAppChat);
+        document.getElementById('wa-more-btn').addEventListener('click', () => {
+            if (waIsAdminMode) document.getElementById('wa-controlBar').classList.toggle('hidden');
+        });
+        document.getElementById('wa-avatar-wrap').addEventListener('click', () => {
+            if (!waIsAdminMode) return;
+            waIsOnline = !waIsOnline;
+            document.getElementById('wa-contactStatus').textContent = waIsOnline ? 'online' : 'last seen today at ' + waGetCurrentTime();
+            document.getElementById('wa-onlineDot').classList.toggle('hidden', !waIsOnline);
+            saveActiveChatToFirebase();
+        });
+        document.getElementById('wa-name-wrap').addEventListener('click', () => {
+            if (!waIsAdminMode) return;
+            document.getElementById('wa-contactNameInput').value = waContactName;
+            document.getElementById('wa-showHeartToggle').checked = waShowHeart;
+            document.getElementById('wa-editNameModal').classList.remove('hidden');
+            if (window.lucide) window.lucide.createIcons();
+        });
+
+        // Send & Keypress
+        document.getElementById('wa-sendBtn').addEventListener('click', waHandleSendOrSave);
+        document.getElementById('wa-messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') waHandleSendOrSave();
+        });
+        document.getElementById('wa-cancel-edit-btn').addEventListener('click', waCancelEdit);
+        document.getElementById('wa-emoji-btn').addEventListener('click', () => {
+            const emojis = ['❤️', '😊', '🥰', '✨', '🌹'];
+            const inp = document.getElementById('wa-messageInput');
+            inp.value += emojis[Math.floor(Math.random() * emojis.length)];
+            inp.focus();
+        });
+
+        // Control Bar Buttons
+        document.getElementById('wa-open-receive-btn').addEventListener('click', () => {
+            document.getElementById('wa-receiveInput').value = '';
+            document.getElementById('wa-receiveModalTitle').textContent = `Receive from ${waContactName}`;
+            document.getElementById('wa-receiveModal').classList.remove('hidden');
+        });
+        document.getElementById('wa-auto-reply-btn').addEventListener('click', () => {
+            waReceiveMessage(waAutoReplies[Math.floor(Math.random() * waAutoReplies.length)]);
+        });
+        document.getElementById('wa-failToggleBtn').addEventListener('click', () => {
+            waFailNextSend = !waFailNextSend;
+            const btn = document.getElementById('wa-failToggleBtn');
+            btn.innerHTML = waFailNextSend
+                ? `<i data-lucide="wifi-off" class="w-3.5 h-3.5 text-red-600"></i><span>Fail: ON</span>`
+                : `<i data-lucide="wifi-off" class="w-3.5 h-3.5 text-gray-500"></i><span>Fail: OFF</span>`;
+            if (window.lucide) window.lucide.createIcons();
+        });
+
+        // Action Modal Controls
+        document.getElementById('wa-close-action-btn').addEventListener('click', () => document.getElementById('wa-actionModal').classList.add('hidden'));
+        document.getElementById('wa-actionModal').addEventListener('click', (e) => {
+            if (e.target.id === 'wa-actionModal') document.getElementById('wa-actionModal').classList.add('hidden');
+        });
+        document.getElementById('wa-act-edit').addEventListener('click', () => {
+            const msg = waMessages.find(m => m.id === waSelectedMessageId);
+            if (!msg) return;
+            waEditingMessageId = msg.id;
+            const val = msg.text || msg.mediaUrl || '';
+            document.getElementById('wa-messageInput').value = val;
+            document.getElementById('wa-editPreviewText').textContent = val;
+            document.getElementById('wa-editBanner').classList.remove('hidden');
+            document.getElementById('wa-sendBtn').innerHTML = `<i data-lucide="check" class="w-5 h-5"></i>`;
+            document.getElementById('wa-actionModal').classList.add('hidden');
+            if (window.lucide) window.lucide.createIcons();
+            document.getElementById('wa-messageInput').focus();
+        });
+        document.getElementById('wa-act-resend').addEventListener('click', () => {
+            const msg = waMessages.find(m => m.id === waSelectedMessageId);
+            document.getElementById('wa-actionModal').classList.add('hidden');
+            if (!msg) return;
+            if (msg.status === 'failed') {
+                waQuickResend(msg.id);
+            } else {
+                waMessages.push({
+                    id: Date.now(),
+                    sender: 'me',
+                    text: msg.text,
+                    mediaUrl: msg.mediaUrl || null,
+                    time: waGetCurrentTime(),
+                    status: 'read',
+                    edited: false
+                });
+                renderWhatsAppMessages();
+                saveActiveChatToFirebase();
+                waShowToast('Message resent!');
+            }
+        });
+        document.getElementById('wa-act-tick').addEventListener('click', () => {
+            const msg = waMessages.find(m => m.id === waSelectedMessageId);
+            if (!msg || msg.sender !== 'me') return;
+            const order = ['sent', 'delivered', 'read', 'failed'];
+            msg.status = order[(order.indexOf(msg.status) + 1) % order.length];
+            renderWhatsAppMessages();
+            saveActiveChatToFirebase();
+            document.getElementById('wa-actionModal').classList.add('hidden');
+            waShowToast(`Status: ${msg.status.toUpperCase()}`);
+        });
+        document.getElementById('wa-act-delete').addEventListener('click', () => {
+            waMessages = waMessages.filter(m => m.id !== waSelectedMessageId);
+            renderWhatsAppMessages();
+            saveActiveChatToFirebase();
+            document.getElementById('wa-actionModal').classList.add('hidden');
+            waShowToast('Message deleted');
+        });
+
+        // Receive Modal Controls
+        document.getElementById('wa-close-receive-btn').addEventListener('click', () => document.getElementById('wa-receiveModal').classList.add('hidden'));
+        document.getElementById('wa-cancel-receive-btn').addEventListener('click', () => document.getElementById('wa-receiveModal').classList.add('hidden'));
+        document.getElementById('wa-confirm-receive-btn').addEventListener('click', () => {
+            const text = document.getElementById('wa-receiveInput').value.trim();
+            if (!text) return;
+            document.getElementById('wa-receiveModal').classList.add('hidden');
+            waReceiveMessage(text);
+        });
+
+        // Edit Name Modal Controls
+        document.getElementById('wa-close-name-btn').addEventListener('click', () => document.getElementById('wa-editNameModal').classList.add('hidden'));
+        document.getElementById('wa-cancel-name-btn').addEventListener('click', () => document.getElementById('wa-editNameModal').classList.add('hidden'));
+        document.getElementById('wa-save-name-btn').addEventListener('click', () => {
+            const newName = document.getElementById('wa-contactNameInput').value.trim();
+            if (!newName) return;
+            waContactName = newName;
+            waShowHeart = document.getElementById('wa-showHeartToggle').checked;
+            document.getElementById('wa-contactNameDisplay').textContent = waContactName;
+            document.getElementById('wa-contactHeart').classList.toggle('hidden', !waShowHeart);
+            document.getElementById('wa-messageInput').placeholder = `Message ${waContactName}...`;
+            document.getElementById('wa-editNameModal').classList.add('hidden');
+            saveActiveChatToFirebase();
+            waShowToast(`Name updated to ${waContactName}`);
+        });
+
+        // Media Link Modal Controls
+        document.getElementById('wa-media-link-btn').addEventListener('click', () => {
+            document.getElementById('wa-mediaUrlInput').value = '';
+            document.getElementById('wa-mediaCaptionInput').value = '';
+            document.getElementById('wa-mediaLinkModal').classList.remove('hidden');
+            if (window.lucide) window.lucide.createIcons();
+        });
+        document.getElementById('wa-close-media-btn').addEventListener('click', () => document.getElementById('wa-mediaLinkModal').classList.add('hidden'));
+        document.getElementById('wa-cancel-media-btn').addEventListener('click', () => document.getElementById('wa-mediaLinkModal').classList.add('hidden'));
+        document.getElementById('wa-send-media-btn').addEventListener('click', () => {
+            const url = document.getElementById('wa-mediaUrlInput').value.trim();
+            const caption = document.getElementById('wa-mediaCaptionInput').value.trim();
+            if (!url) return;
+            document.getElementById('wa-mediaLinkModal').classList.add('hidden');
+            waMessages.push({
+                id: Date.now(),
+                sender: 'me',
+                text: caption,
+                mediaUrl: url,
+                time: waGetCurrentTime(),
+                status: waFailNextSend ? 'failed' : 'read',
+                edited: false
+            });
+            renderWhatsAppMessages();
+            saveActiveChatToFirebase();
+        });
+
+        // Admin: Create New WhatsApp Chat in Folder & Open Editor
+        document.getElementById('create-chat-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const folderId = document.getElementById('chat-target-folder-select').value;
+            const titleInput = document.getElementById('new-chat-title');
+            const contactInput = document.getElementById('new-chat-contact');
+            const btn = document.getElementById('create-chat-btn');
+
+            if (!folderId) {
+                showToast('Please select a folder first', 'error');
+                return;
+            }
+
+            const title = titleInput.value.trim();
+            const contact = contactInput.value.trim() || 'Mahira Zanu';
+
+            const starterMessages = [
+                { id: Date.now() + 1, sender: 'them', text: 'Assalam o Alaikum! Kaise ho? 😊', time: '12:40 PM', status: 'read', edited: false },
+                { id: Date.now() + 2, sender: 'me', text: 'Walaikum Assalam! Main bilkul theek hoon, tum sunao?', time: '12:41 PM', status: 'read', edited: false }
+            ];
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Saving...`;
+
+            try {
+                const newChatPayload = {
+                    folderId: folderId,
+                    title: title,
+                    contactName: contact,
+                    showHeart: true,
+                    isOnline: true,
+                    messagesJson: JSON.stringify(starterMessages),
+                    createdAt: Date.now(),
+                    updatedAt: Date.now()
+                };
+                const docRef = await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'chats'), newChatPayload);
+                titleInput.value = '';
+                showToast(`Chat "${title}" created! Opening Editor...`, 'success');
+                openWhatsAppChat({ id: docRef.id, ...newChatPayload }, getFolderFullPath(folderId), true);
+            } catch (err) {
+                console.error('Create chat error:', err);
+                showToast('Failed to create chat', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-plus"></i> Add Chat`;
             }
         });
 
