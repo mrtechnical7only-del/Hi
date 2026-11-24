@@ -323,32 +323,37 @@
                         <p id="wa-editPreviewText" class="text-xs text-gray-600 truncate">Original text...</p>
                     </div>
                 </div>
-                <button id="wa-cancel-edit-btn" class="p-1.5 text-gray-500 hover:text-gray-800 rounded-full hover:bg-gray-200">
+                <button id="wa-cancel-edit-btn" type="button" class="p-1.5 text-gray-500 hover:text-gray-800 rounded-full hover:bg-gray-200">
                     <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
 
-            <!-- Bottom Input Bar (Admin Only) -->
-            <footer id="wa-footer" class="hidden bg-[#f0f2f5] px-2.5 py-2 flex items-end gap-2 z-20 shrink-0">
+            <!-- Bottom Input Bar (Visible & Realistic for User in Read-Only Mode, Editable for Admin) -->
+            <footer id="wa-footer" class="bg-[#f0f2f5] px-2.5 py-2 flex items-end gap-2 z-20 shrink-0">
                 <div class="flex-1 bg-white rounded-3xl px-3 py-1.5 flex items-center gap-2 shadow-xs border border-gray-100">
-                    <button id="wa-emoji-btn" class="text-gray-500 hover:text-gray-700 p-1 rounded-full transition" title="Add Heart Emoji">
+                    <button id="wa-emoji-btn" type="button" class="text-gray-500 hover:text-gray-700 p-1 rounded-full transition" title="Add Heart Emoji">
                         <i data-lucide="smile" class="w-5 h-5"></i>
                     </button>
 
                     <input 
                         type="text" 
                         id="wa-messageInput" 
-                        placeholder="Message..." 
+                        placeholder="Message" 
                         class="w-full bg-transparent text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none py-1"
                     >
 
-                    <button id="wa-media-link-btn" class="text-gray-500 hover:text-[#008069] p-1 rounded-full transition" title="Send Image / GIF Link">
-                        <i data-lucide="image" class="w-5 h-5"></i>
+                    <button id="wa-attach-btn" type="button" class="text-gray-500 hover:text-gray-700 p-1 rounded-full transition -rotate-45" title="Attach">
+                        <i data-lucide="paperclip" class="w-5 h-5"></i>
+                    </button>
+
+                    <button id="wa-media-link-btn" type="button" class="text-gray-500 hover:text-[#008069] p-1 rounded-full transition" title="Send Image / GIF Link">
+                        <i data-lucide="camera" class="w-5 h-5"></i>
                     </button>
                 </div>
 
                 <button 
                     id="wa-sendBtn"
+                    type="button"
                     class="w-11 h-11 rounded-full bg-[#00a884] hover:bg-[#008f6f] active:scale-95 text-white flex items-center justify-center shadow-md transition shrink-0"
                     title="Send Message"
                 >
@@ -847,6 +852,16 @@
         let currentWatchingLogIndex = null;
         let watchStartTime = null;
         let watchIntervalTimer = null;
+
+        // Step-by-Step Navigation History Helper (Android Hardware Back Button Support)
+        let historyApiSupported = true;
+        function pushNavState(tag) {
+            try {
+                window.history.pushState({ appNav: tag, ts: Date.now() }, '');
+            } catch (e) {
+                historyApiSupported = false;
+            }
+        }
 
         // ============================================================================
         // 2. UI HELPERS (TOAST, CONFIRM MODAL, DURATION FORMATTER)
@@ -1507,6 +1522,7 @@
                     const folderObj = foldersData.find(f => f.id === fId);
                     if (folderObj) {
                         selectedUserFolderId = fId;
+                        pushNavState('folder');
                         recordFolderOpen(folderObj);
                         renderUserView();
                     }
@@ -1531,6 +1547,7 @@
             subEl.textContent = `Folder: ${folderName}`;
 
             lightbox.classList.remove('hidden');
+            pushNavState('lightbox');
 
             // Silently record watch duration in background for Normal User (No UI timer shown to user)
             if (currentRole === 'user') {
@@ -1538,8 +1555,15 @@
             }
         }
 
-        function closeImageLightbox() {
+        function closeImageLightbox(fromPopState = false) {
             const lightbox = document.getElementById('image-lightbox');
+            if (lightbox.classList.contains('hidden')) return;
+
+            if (!fromPopState && historyApiSupported && window.history.state && window.history.state.appNav === 'lightbox') {
+                window.history.back();
+                return;
+            }
+
             lightbox.classList.add('hidden');
             document.getElementById('lightbox-img').src = '';
 
@@ -1548,10 +1572,10 @@
             }
         }
 
-        document.getElementById('close-lightbox-btn').addEventListener('click', closeImageLightbox);
+        document.getElementById('close-lightbox-btn').addEventListener('click', () => closeImageLightbox(false));
         document.getElementById('lightbox-backdrop').addEventListener('click', (e) => {
             if (e.target.id === 'lightbox-backdrop') {
-                closeImageLightbox();
+                closeImageLightbox(false);
             }
         });
 
@@ -2024,6 +2048,7 @@
                 document.getElementById('admin-view').classList.add('hidden');
                 document.getElementById('user-view').classList.remove('hidden');
 
+                pushNavState('root');
                 renderUserView();
                 await startUserTelemetrySession();
                 showToast('Welcome to My Cloud Storage', 'success');
@@ -2036,6 +2061,7 @@
                 document.getElementById('user-view').classList.add('hidden');
                 document.getElementById('admin-view').classList.remove('hidden');
 
+                pushNavState('admin');
                 renderAdminStorageView();
                 renderAdminActivityLogs();
                 showToast('Admin Dashboard Unlocked', 'success');
@@ -2047,7 +2073,7 @@
         });
 
         // User Navigation Back One Level (To Parent Folder or Root)
-        document.getElementById('user-back-btn').addEventListener('click', () => {
+        function stepBackUserFolder() {
             if (!selectedUserFolderId) return;
             const currentFolder = foldersData.find(f => f.id === selectedUserFolderId);
             const parentId = currentFolder && currentFolder.parentId ? currentFolder.parentId : null;
@@ -2060,6 +2086,44 @@
                 syncUserTelemetryToFirestore('Online (Browsing Vault)', 'Main Folders Dashboard');
             }
             renderUserView();
+        }
+
+        document.getElementById('user-back-btn').addEventListener('click', () => {
+            if (!selectedUserFolderId) return;
+            if (historyApiSupported && window.history.state && window.history.state.appNav === 'folder') {
+                window.history.back();
+            } else {
+                stepBackUserFolder();
+            }
+        });
+
+        // Android / Browser Hardware Back Button Handler (Step-by-Step Navigation)
+        window.addEventListener('popstate', () => {
+            const chatModal = document.getElementById('whatsapp-chat-modal');
+            const lightbox = document.getElementById('image-lightbox');
+
+            // Step 1: If WhatsApp Chat is open, close it and return to folder
+            if (chatModal && !chatModal.classList.contains('hidden')) {
+                closeWhatsAppChat(true);
+                return;
+            }
+
+            // Step 2: If Image Lightbox is open, close it and return to folder
+            if (lightbox && !lightbox.classList.contains('hidden')) {
+                closeImageLightbox(true);
+                return;
+            }
+
+            // Step 3: If User is inside a folder or sub-folder, step back one level
+            if (currentRole === 'user' && selectedUserFolderId !== null) {
+                stepBackUserFolder();
+                return;
+            }
+
+            // Step 4: If already on main dashboard, prevent accidental direct exit
+            if (currentRole === 'user' || currentRole === 'admin') {
+                pushNavState(currentRole === 'user' ? 'root' : 'admin');
+            }
         });
 
         // User Logout
@@ -2350,25 +2414,25 @@
                 list.querySelectorAll('.wa-quick-resend').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        waQuickResend(Number(btn.getAttribute('data-wa-resend')));
+                        const msgId = Number(btn.getAttribute('data-wa-resend'));
+                        waQuickResend(msgId);
                     });
                 });
             }
 
             if (window.lucide) window.lucide.createIcons();
             const container = document.getElementById('wa-chatContainer');
-            container.scrollTop = container.scrollHeight;
+            if (container) container.scrollTop = container.scrollHeight;
         }
 
-        function openWhatsAppChat(chatObj, folderName, isAdminEdit) {
+        function openWhatsAppChat(chatObj, folderName, isAdmin) {
             waActiveChatId = chatObj.id;
-            waIsAdminMode = Boolean(isAdminEdit);
+            waIsAdminMode = isAdmin;
             waContactName = chatObj.contactName || 'Mahira Zanu';
             waShowHeart = chatObj.showHeart !== false;
             waIsOnline = chatObj.isOnline !== false;
             waEditingMessageId = null;
             waSelectedMessageId = null;
-            waFailNextSend = false;
 
             try {
                 waMessages = JSON.parse(chatObj.messagesJson || '[]');
@@ -2376,20 +2440,23 @@
                 waMessages = [];
             }
 
-            // Update Header UI
             document.getElementById('wa-contactNameDisplay').textContent = waContactName;
             document.getElementById('wa-contactHeart').classList.toggle('hidden', !waShowHeart);
-            document.getElementById('wa-contactStatus').textContent = waIsOnline ? 'online' : 'last seen recently';
+            document.getElementById('wa-contactStatus').textContent = waIsOnline ? 'online' : 'last seen today';
             document.getElementById('wa-onlineDot').classList.toggle('hidden', !waIsOnline);
-            document.getElementById('wa-messageInput').placeholder = `Message ${waContactName}...`;
 
-            // Toggle Admin-only controls vs Read-Only User view
+            // Toggle Admin-only controls vs Realistic Read-Only User view
             const avatarWrap = document.getElementById('wa-avatar-wrap');
             const nameWrap = document.getElementById('wa-name-wrap');
             const moreBtn = document.getElementById('wa-more-btn');
             const controlBar = document.getElementById('wa-controlBar');
             const footer = document.getElementById('wa-footer');
             const syncInd = document.getElementById('wa-sync-indicator');
+            const msgInput = document.getElementById('wa-messageInput');
+            const emojiBtn = document.getElementById('wa-emoji-btn');
+            const attachBtn = document.getElementById('wa-attach-btn');
+            const mediaLinkBtn = document.getElementById('wa-media-link-btn');
+            const sendBtn = document.getElementById('wa-sendBtn');
 
             document.getElementById('wa-editBanner').classList.add('hidden');
             document.getElementById('wa-actionModal').classList.add('hidden');
@@ -2397,24 +2464,48 @@
             document.getElementById('wa-editNameModal').classList.add('hidden');
             document.getElementById('wa-mediaLinkModal').classList.add('hidden');
 
+            // Keep WhatsApp footer & 3-dots visible in both modes for 100% realistic screenshot look
+            footer.classList.remove('hidden');
+            moreBtn.classList.remove('hidden');
+
             if (waIsAdminMode) {
                 avatarWrap.classList.add('cursor-pointer');
                 nameWrap.classList.add('cursor-pointer');
-                moreBtn.classList.remove('hidden');
                 controlBar.classList.remove('hidden');
-                footer.classList.remove('hidden');
                 syncInd.classList.remove('hidden');
                 syncInd.textContent = 'Synced ✓';
+
+                // Enable interactive footer controls for Admin
+                footer.classList.remove('pointer-events-none');
+                msgInput.disabled = false;
+                msgInput.readOnly = false;
+                msgInput.placeholder = `Message ${waContactName}...`;
+                emojiBtn.disabled = false;
+                attachBtn.disabled = false;
+                mediaLinkBtn.disabled = false;
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = `<i data-lucide="send" class="w-5 h-5 ml-0.5"></i>`;
             } else {
                 avatarWrap.classList.remove('cursor-pointer');
                 nameWrap.classList.remove('cursor-pointer');
-                moreBtn.classList.add('hidden');
                 controlBar.classList.add('hidden');
-                footer.classList.add('hidden');
                 syncInd.classList.add('hidden');
+
+                // Realistic WhatsApp bottom bar shown, but strictly disabled (non-editable) for User
+                footer.classList.add('pointer-events-none');
+                msgInput.value = '';
+                msgInput.disabled = true;
+                msgInput.readOnly = true;
+                msgInput.placeholder = 'Message';
+                emojiBtn.disabled = true;
+                attachBtn.disabled = true;
+                mediaLinkBtn.disabled = true;
+                sendBtn.disabled = true;
+                sendBtn.innerHTML = `<i data-lucide="mic" class="w-5 h-5"></i>`;
             }
 
             document.getElementById('whatsapp-chat-modal').classList.remove('hidden');
+            pushNavState('chat');
             renderWhatsAppMessages();
 
             // Stealth watch tracking for Normal User
@@ -2426,8 +2517,16 @@
             }
         }
 
-        function closeWhatsAppChat() {
-            document.getElementById('whatsapp-chat-modal').classList.add('hidden');
+        function closeWhatsAppChat(fromPopState = false) {
+            const modal = document.getElementById('whatsapp-chat-modal');
+            if (modal.classList.contains('hidden')) return;
+
+            if (!fromPopState && historyApiSupported && window.history.state && window.history.state.appNav === 'chat') {
+                window.history.back();
+                return;
+            }
+
+            modal.classList.add('hidden');
             waActiveChatId = null;
             if (currentRole === 'user' && !waIsAdminMode) {
                 stopRecordingImageWatch();
@@ -2537,7 +2636,7 @@
         }
 
         // Bind WhatsApp Modal Controls
-        document.getElementById('wa-close-btn').addEventListener('click', closeWhatsAppChat);
+        document.getElementById('wa-close-btn').addEventListener('click', () => closeWhatsAppChat(false));
         document.getElementById('wa-more-btn').addEventListener('click', () => {
             if (waIsAdminMode) document.getElementById('wa-controlBar').classList.toggle('hidden');
         });
